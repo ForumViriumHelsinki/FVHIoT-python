@@ -1,3 +1,4 @@
+import certifi
 from kafka import KafkaProducer, KafkaConsumer
 
 
@@ -9,7 +10,7 @@ def get_producer(bootstrap_servers, security_protocol,
         bootstrap_servers=bootstrap_servers,
         security_protocol=security_protocol,
         # ssl_check_hostname=self.app.config.get('ssl_check_hostname'],
-        # ssl_cafile=certifi.where(),
+        ssl_cafile=certifi.where(),
         sasl_mechanism=sasl_mechanism,
         sasl_plain_username=sasl_plain_username,
         sasl_plain_password=sasl_plain_password
@@ -23,7 +24,7 @@ def get_consumer(topic, bootstrap_servers, security_protocol,
         bootstrap_servers=bootstrap_servers,
         security_protocol=security_protocol,
         # ssl_check_hostname = self.app.config.get('ssl_check_hostname'],
-        # ssl_cafile=certifi.where(),
+        ssl_cafile=certifi.where(),
         sasl_mechanism=sasl_mechanism,
         sasl_plain_username=sasl_plain_username,
         sasl_plain_password=sasl_plain_password
