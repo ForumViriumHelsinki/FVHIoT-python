@@ -74,6 +74,10 @@ def parse_sensornode(hex_str, port=None):
     return data
 
 
+def decode_hex(hex_str: str, port: int = None):
+    return parse_sensornode(hex_str, port=port)
+
+
 if __name__ == '__main__':
     import sys
 

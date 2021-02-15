@@ -46,6 +46,10 @@ def parse_elsys(hex_str: str, port: int = None):
     return data
 
 
+def decode_hex(hex_str: str, port: int = None):
+    return parse_elsys(hex_str, port=port)
+
+
 if __name__ == '__main__':
     import sys
 
