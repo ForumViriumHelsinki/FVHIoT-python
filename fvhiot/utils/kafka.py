@@ -5,12 +5,15 @@ from kafka import KafkaProducer, KafkaConsumer
 # NOTE: arguments are probably about to change
 
 def get_producer(bootstrap_servers, security_protocol,
-                 sasl_mechanism, sasl_plain_username, sasl_plain_password):
+                 sasl_mechanism, sasl_plain_username, sasl_plain_password,
+                 ssl_certfile=None, ssl_keyfile=None):
     return KafkaProducer(
         bootstrap_servers=bootstrap_servers,
         security_protocol=security_protocol,
         # ssl_check_hostname=self.app.config.get('ssl_check_hostname'],
         ssl_cafile=certifi.where(),
+        ssl_certfile=ssl_certfile,
+        ssl_keyfile=ssl_keyfile,
         sasl_mechanism=sasl_mechanism,
         sasl_plain_username=sasl_plain_username,
         sasl_plain_password=sasl_plain_password
@@ -18,13 +21,16 @@ def get_producer(bootstrap_servers, security_protocol,
 
 
 def get_consumer(topic, bootstrap_servers, security_protocol,
-                 sasl_mechanism, sasl_plain_username, sasl_plain_password):
+                 sasl_mechanism, sasl_plain_username, sasl_plain_password,
+                 ssl_certfile=None, ssl_keyfile=None):
     return KafkaConsumer(
         topic,
         bootstrap_servers=bootstrap_servers,
         security_protocol=security_protocol,
         # ssl_check_hostname = self.app.config.get('ssl_check_hostname'],
         ssl_cafile=certifi.where(),
+        ssl_certfile=ssl_certfile,
+        ssl_keyfile=ssl_keyfile,
         sasl_mechanism=sasl_mechanism,
         sasl_plain_username=sasl_plain_username,
         sasl_plain_password=sasl_plain_password
