@@ -37,8 +37,6 @@ async def extract_data_from_starlette_request(request: Request) -> dict:
             f: UploadFile = formdata[k]  # noqa
             data["request"]["files"][k] = await f.read()
     # If form was not detected, read request.body() (even if it is empty)
-    from pprint import pprint
-    pprint(data)
     if data["request"]["post"] == {} and data["request"]["files"] == {}:
         data["request"]["body"] = await request.body()
     return data
