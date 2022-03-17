@@ -83,6 +83,7 @@ def get_kafka_consumer(
     Use seek_to_offset() to subscribe to given topic(s) and seek to default offset 0
     """
     if offset != 0:
+        logging.info(f"Creating KafkaConsumer with group_id '{group_id}' and seeking to offset {offset}")
         kc = KafkaConsumer(
             bootstrap_servers=bootstrap_servers,
             security_protocol=security_protocol,
@@ -95,10 +96,9 @@ def get_kafka_consumer(
             group_id=group_id,
             enable_auto_commit=enable_auto_commit,
         )
-        logging.info(f"SEEK {offset} {group_id}!")
         seek_to_offset(kc, topic, offset)
     else:
-        logging.info(f"NO SEEK!  {group_id}")
+        logging.info(f"Creating KafkaConsumer with group_id '{group_id}' and not seeking")
         kc = KafkaConsumer(
             topic,
             bootstrap_servers=bootstrap_servers,
