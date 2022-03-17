@@ -29,7 +29,7 @@ def extract_data_from_flask_request(request: flask.request) -> dict:
     if request.method == "POST":
         for fn in request.files.keys():
             data["request"]["files"]["fn"] = request.files[fn].read()
-    # If there was no files, put request body to the data as is
+    # If there were no files, put request body to the data as is
     if data["request"]["files"] == {}:
         data["request"]["body"] = request.data
     return data

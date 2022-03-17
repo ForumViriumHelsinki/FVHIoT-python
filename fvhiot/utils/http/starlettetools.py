@@ -3,6 +3,10 @@ import datetime
 from starlette.datastructures import UploadFile
 from starlette.requests import Request
 
+from fvhiot.models.requests import RequestModel
+import logging
+from pydantic import ValidationError
+
 
 async def extract_data_from_starlette_request(request: Request) -> dict:
     """
@@ -39,4 +43,11 @@ async def extract_data_from_starlette_request(request: Request) -> dict:
     # If form was not detected, read request.body() (even if it is empty)
     if data["request"]["post"] == {} and data["request"]["files"] == {}:
         data["request"]["body"] = await request.body()
-    return data
+    # Validate data
+    try:
+        request_data = RequestModel(**data)
+        return request_data.dict()
+    except ValidationError:
+        logging.exception("Failed to validate serialized request data")
+        logging.debug(data)
+        return data

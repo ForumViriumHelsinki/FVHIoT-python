@@ -7,6 +7,9 @@ import certifi
 from kafka import KafkaConsumer, KafkaProducer, TopicPartition
 from kafka.errors import NoBrokersAvailable
 
+from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
+import asyncio
+from aiokafka.helpers import create_ssl_context
 
 # New try 03/2022 here:
 
@@ -19,11 +22,11 @@ def get_kafka_producer(
         sasl_mechanism: str = None,
         sasl_plain_username: str = None,
         sasl_plain_password: str = None,
-) -> KafkaProducer:
+) -> AIOKafkaProducer:
     """
     Simply create and return a KafkaProducer using given arguments.
     """
-    return KafkaProducer(
+    return AIOKafkaProducer(
         bootstrap_servers=bootstrap_servers,
         security_protocol=security_protocol,
         # ssl_check_hostname=self.app.config.get('ssl_check_hostname'],
@@ -82,43 +85,25 @@ def get_kafka_consumer(
     Simply create and return a KafkaConsumer using given arguments.
     Use seek_to_offset() to subscribe to given topic(s) and seek to default offset 0
     """
-    if offset != 0:
-        kc = KafkaConsumer(
-            bootstrap_servers=bootstrap_servers,
-            security_protocol=security_protocol,
-            ssl_cafile=ssl_cafile or certifi.where(),
-            ssl_certfile=ssl_certfile,
-            ssl_keyfile=ssl_keyfile,
-            sasl_mechanism=sasl_mechanism,
-            sasl_plain_username=sasl_plain_username,
-            sasl_plain_password=sasl_plain_password,
-            group_id=group_id,
-            enable_auto_commit=enable_auto_commit,
-        )
-        logging.info(f"SEEK {offset} {group_id}!")
-        seek_to_offset(kc, topic, offset)
-    else:
-        logging.info(f"NO SEEK!  {group_id}")
-        kc = KafkaConsumer(
-            topic,
-            bootstrap_servers=bootstrap_servers,
-            security_protocol=security_protocol,
-            ssl_cafile=ssl_cafile or certifi.where(),
-            ssl_certfile=ssl_certfile,
-            ssl_keyfile=ssl_keyfile,
-            sasl_mechanism=sasl_mechanism,
-            sasl_plain_username=sasl_plain_username,
-            sasl_plain_password=sasl_plain_password,
-            group_id=group_id,
-            enable_auto_commit=enable_auto_commit,
-        )
+    kc = KafkaConsumer(
+        bootstrap_servers=bootstrap_servers,
+        security_protocol=security_protocol,
+        ssl_cafile=ssl_cafile or certifi.where(),
+        ssl_certfile=ssl_certfile,
+        ssl_keyfile=ssl_keyfile,
+        sasl_mechanism=sasl_mechanism,
+        sasl_plain_username=sasl_plain_username,
+        sasl_plain_password=sasl_plain_password,
+        group_id=group_id,
+        enable_auto_commit=enable_auto_commit,
+    )
+    seek_to_offset(kc, topic, offset)
     return kc
 
 
 def get_kafka_consumer_by_envs(topic: str | list[str], offset: int = 0):
     """
     Create and return KafkaConsumer, which is initialized by values from environment variables.
-    Optionally seek to `offset`, which is negative integer (messages below the last message).
     At least these variables must usually be defined to make the connection to brokers:
     KAFKA_SASL_USERNAME
     KAFKA_SASL_PASSWORD
@@ -148,12 +133,11 @@ def get_kafka_consumer_by_envs(topic: str | list[str], offset: int = 0):
         return None
 
 
-def seek_to_offset(consumer: KafkaConsumer, topic: str, start: int = 0):
+def seek_to_offset(consumer: KafkaConsumer, topic: str, start: int = -1):
     """
-    Seek to a message in topic. `start` must be negative integer or zero (no effect)
+    Seek to the last message in topic.
     """
     # topic = os.getenv("KAFKA_RAW_DATA_TOPIC_NAME")
-    assert start <= 0
     partition_number, offset = -1, -1
     # Loop through partitions and find the latest offset
     for p in consumer.partitions_for_topic(topic):
@@ -167,7 +151,7 @@ def seek_to_offset(consumer: KafkaConsumer, topic: str, start: int = 0):
             offset = last_offset
             partition_number = p
     tp = TopicPartition(topic, partition_number)
-    consumer.seek(tp, offset + start)
+    consumer.seek(tp, offset - start)
 
 
 # NOTE: arguments are probably about to change

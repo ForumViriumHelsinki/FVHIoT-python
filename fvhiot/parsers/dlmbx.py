@@ -1,9 +1,10 @@
 # https://github.com/decentlab/decentlab-decoders/blob/master/DL-MBX/DL-MBX.py
 # https://www.decentlab.com/products/ultrasonic-distance-/-level-sensor-for-lorawan
-
-
+import datetime
 import struct
 import binascii
+from typing import Optional
+from zoneinfo import ZoneInfo
 
 PROTOCOL_VERSION = 2
 
@@ -16,12 +17,7 @@ SENSORS = [
             {"name": "valid_samples", "convert": lambda x: x[1]},
         ],
     },
-    {
-        "length": 1,
-        "values": [
-            {"name": "batt", "convert": lambda x: x[0] / 1000}
-        ]
-    },
+    {"length": 1, "values": [{"name": "batt", "convert": lambda x: x[0] / 1000}]},
 ]
 
 
@@ -35,18 +31,15 @@ def parse_dlmbx(hex_str: str, port: int = None):
     devid = struct.unpack(">H", bytes_[1:3])[0]
     bin_flags = bin(struct.unpack(">H", bytes_[3:5])[0])
     flags = bin_flags[2:].zfill(struct.calcsize(">H") * 8)[::-1]
-    words = [struct.unpack(">H", bytes_[i: i + 2])[0] for i in range(5, len(bytes_), 2)]
+    words = [struct.unpack(">H", bytes_[i : i + 2])[0] for i in range(5, len(bytes_), 2)]
 
     cur = 0
-    result = {
-        "dl_id": devid,  # Decent lab device id
-        "protocol": version
-    }
+    result = {"dl_id": devid, "protocol": version}  # Decent lab device id
     for flag, sensor in zip(flags, SENSORS):
         if flag != "1":
             continue
 
-        x = words[cur: cur + sensor["length"]]
+        x = words[cur : cur + sensor["length"]]
         cur += sensor["length"]
         for value in sensor["values"]:
             if "convert" not in value:
@@ -60,10 +53,34 @@ def decode_hex(hex_str: str, port: int = None):
     return parse_dlmbx(hex_str, port=port)
 
 
+def create_datalines(hex_str: str, time_str: Optional[str] = None, port: Optional[int] = None) -> list:
+    """
+    Return well-known parsed data formatted list of data, e.g.
+
+    [
+      {
+        "time": "2022-03-02T12:21:30.123000+00:00",
+        "data": {
+          "dl_id": 6359,
+          "protocol": 2,
+          "distance": 2517,
+          "valid_samples": 15,
+          "batt": 2.756
+        }
+      }
+    ]
+    """
+    values = decode_hex(hex_str, port)
+    dataline = {"time": time_str, "data": values}
+    datalines = [dataline]
+    return datalines
+
+
 if __name__ == "__main__":
     import sys
     import json
 
+    now = datetime.datetime(2022, 3, 2, 12, 21, 30, 123000, tzinfo=ZoneInfo("UTC")).isoformat()
     if len(sys.argv) > 1:
         payloads = [sys.argv[1]]
     else:
@@ -73,4 +90,5 @@ if __name__ == "__main__":
             "0218d7000309d5000f0ac4",
         ]
     for pl in payloads:
-        print(json.dumps(decode_hex(pl), indent=2))
+        dl = create_datalines(pl, time_str=now, port=None)
+        print(json.dumps(dl, indent=2))
