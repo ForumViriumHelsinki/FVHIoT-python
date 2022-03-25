@@ -41,13 +41,12 @@ def parse_sensornode_table() -> dict:
     return sensornode_map
 
 
-def parse_sensornode(hex_str, port=None) -> dict:
+def parse_sensornode(hex_str: str, port: int) -> dict:
     """
     Decode Sensor node hex string payload from LoRaWAN network.
     Return a dict containing sensor data.
     """
-
-    _id = int(port)
+    _id = port
     tab = parse_sensornode_table()
     data = {}
     while len(hex_str) >= 0:
@@ -57,7 +56,6 @@ def parse_sensornode(hex_str, port=None) -> dict:
         chunk = hex_str[:s]
         hex_str = hex_str[s:]
         if _id in [1]:  # List contains fields not to parse
-            # print(hex_str[:2])
             # Get and remove next id from hex payload
             _id = int(hex_str[:2], 16)
             hex_str = hex_str[2:]
@@ -85,12 +83,12 @@ def parse_sensornode(hex_str, port=None) -> dict:
     return data
 
 
-def decode_hex(hex_str: str, port: int = None) -> dict:
+def decode_hex(hex_str: str, port: int) -> dict:
     """
     Decode hex string payload from LoRaWAN network.
     Return a dict containing sensor data.
     """
-    return parse_sensornode(hex_str, port=port)
+    return parse_sensornode(hex_str, port)
 
 
 def create_datalines(hex_str: str, port: int, time_str: Optional[str] = None) -> list:

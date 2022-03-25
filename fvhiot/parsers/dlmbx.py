@@ -21,7 +21,7 @@ SENSORS = [
 ]
 
 
-def parse_dlmbx(hex_str: str, port: int = None):
+def parse_dlmbx(hex_str: str, port: int):
     """hex_str: payload as hex string"""
     bytes_ = bytearray(binascii.a2b_hex(hex_str))
     version = bytes_[0]
@@ -49,8 +49,8 @@ def parse_dlmbx(hex_str: str, port: int = None):
     return result
 
 
-def decode_hex(hex_str: str, port: int = None):
-    return parse_dlmbx(hex_str, port=port)
+def decode_hex(hex_str: str, port: int):
+    return parse_dlmbx(hex_str, port)
 
 
 def create_datalines(hex_str: str, port: int, time_str: Optional[str] = None) -> list:

@@ -12,7 +12,7 @@ https://github.com/cyberman54/ESP32-Paxcounter/blob/master/src/TTN/plain_decoder
 """
 
 
-def parse_paxcounter(payload_hex: str, port=Union[int, str]) -> dict:
+def parse_paxcounter(payload_hex: str, port: int) -> dict:
     """
     Extract wifi and ble counts from `payload_hex` and return them in a dict.
     Currently, only payloads sent to FPort 1 are parsed.
@@ -36,13 +36,13 @@ def parse_paxcounter(payload_hex: str, port=Union[int, str]) -> dict:
     return data
 
 
-def decode_hex(hex_str: str, port: Union[int, str]) -> dict:
+def decode_hex(hex_str: str, port: int) -> dict:
     """
     Decode hex string payload from LoRaWAN network.
     Return a dict containing sensor data.
     NOTE: this is here for backwards compatibility.
     """
-    return parse_paxcounter(hex_str, port=port)
+    return parse_paxcounter(hex_str, port)
 
 
 def create_datalines(hex_str: str, port: int, time_str: Optional[str] = None) -> list:

@@ -60,7 +60,7 @@ def get_timestamp(value: bytes) -> datetime.datetime:
     return dt
 
 
-def parse_mcf88(hex_str: str, port=None) -> Optional[list]:
+def parse_mcf88(hex_str: str, port: int) -> Optional[list]:
     """
     Parse MCF88 hex payload like
     "0462651527da078e4d8e01a4691527dd078f488e01676d1527e9078d1a8e015d" to float values.
@@ -85,18 +85,16 @@ def parse_mcf88(hex_str: str, port=None) -> Optional[list]:
             # TODO: should we pydantic model DataLine for this?
             dataline = {"time": ts.isoformat(), "data": parsed_data}
             datalines.append(dataline)
-        # import json
-        # print(json.dumps(datalines, indent=2))
         return datalines
     return None
 
 
-def decode_hex(hex_str: str, port: int = None) -> Optional[list]:
+def decode_hex(hex_str: str, port: int) -> Optional[list]:
     """
     Decode hex string payload from LoRaWAN network.
     Return a dict containing sensor data.
     """
-    return parse_mcf88(hex_str, port=port)
+    return parse_mcf88(hex_str, port)
 
 
 def create_datalines(hex_str: str, port: int, time_str: Optional[str] = None) -> list:
