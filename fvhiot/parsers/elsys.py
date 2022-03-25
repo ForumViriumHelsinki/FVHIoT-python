@@ -55,7 +55,7 @@ def decode_hex(hex_str: str, port: int = None):
     return parse_elsys(hex_str, port=port)
 
 
-def create_datalines(hex_str: str, time_str: Optional[str] = None, port: Optional[int] = None) -> list:
+def create_datalines(hex_str: str, port: int, time_str: Optional[str] = None) -> list:
     """
     Return well-known parsed data formatted list of data, e.g.
 
@@ -79,19 +79,27 @@ def create_datalines(hex_str: str, time_str: Optional[str] = None, port: Optiona
     return datalines
 
 
+def main(samples: list):
+    now = datetime.datetime(2022, 3, 2, 12, 21, 30, 123000, tzinfo=ZoneInfo("UTC")).isoformat()
+    if len(sys.argv) == 3:
+        print(json.dumps(create_datalines(sys.argv[1], int(sys.argv[2]), now), indent=2))
+    else:
+        print("Some examples:")
+        for s in samples:
+            try:
+                print(json.dumps(create_datalines(s[0], s[1], now), indent=2))
+            except ValueError as err:
+                print(f"Invalid FPort '{s[1]}' or payload size {len(s[0])}: {err}")
+        print(f"\nUsage: {sys.argv[0]} hex_payload port\n\n")
+
+
 if __name__ == "__main__":
+    import json
     import sys
 
-    now = datetime.datetime(2022, 3, 2, 12, 21, 30, 123000, tzinfo=ZoneInfo("UTC")).isoformat()
-    try:
-        print(parse_elsys(sys.argv[1], int(sys.argv[2])))
-    except IndexError as err:
-        print("Some examples:")
-        for s in [
-            ("010112022d0400f20504060140070e51", 5),
-            ("010109022f0400000500060224070e38", 5),
-            ("010102022f0400000500060275070e4f", 5),
-        ]:
-            print(create_datalines(s[0], time_str=now, port=s[1]))
-
-        print(f"\nUsage: {sys.argv[0]} hex_payload port\n\n")
+    examples = [
+        ("010112022d0400f20504060140070e51", 5),
+        ("010109022f0400000500060224070e38", 5),
+        ("010102022f0400000500060275070e4f", 5),
+    ]
+    main(examples)
