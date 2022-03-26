@@ -4,11 +4,10 @@ https://github.com/decentlab/decentlab-decoders/blob/master/DL-PM/DL-PM.py
 
 import binascii
 import datetime
+import re
 import struct
 from typing import Optional
 from zoneinfo import ZoneInfo
-
-from helpers import clean_key
 
 PROTOCOL_VERSION = 2
 
@@ -67,6 +66,12 @@ def decode(msg, hex_=False):
 
             result[value["name"]] = {"value": value["convert"](x), "unit": value.get("unit", None)}
     return result
+
+
+def clean_key(k):
+    replace_re = re.compile(r"[. ]")
+    new_key = replace_re.sub("_", k).lower()
+    return new_key
 
 
 def parse_decentlab_pm(hex_str: str, port: int) -> dict:
