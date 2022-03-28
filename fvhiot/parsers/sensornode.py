@@ -41,13 +41,12 @@ def parse_sensornode_table() -> dict:
     return sensornode_map
 
 
-def parse_sensornode(hex_str, port=None) -> dict:
+def parse_sensornode(hex_str: str, port: int) -> dict:
     """
     Decode Sensor node hex string payload from LoRaWAN network.
     Return a dict containing sensor data.
     """
-
-    _id = int(port)
+    _id = port
     tab = parse_sensornode_table()
     data = {}
     while len(hex_str) >= 0:
@@ -57,7 +56,6 @@ def parse_sensornode(hex_str, port=None) -> dict:
         chunk = hex_str[:s]
         hex_str = hex_str[s:]
         if _id in [1]:  # List contains fields not to parse
-            # print(hex_str[:2])
             # Get and remove next id from hex payload
             _id = int(hex_str[:2], 16)
             hex_str = hex_str[2:]
@@ -66,7 +64,7 @@ def parse_sensornode(hex_str, port=None) -> dict:
         if _id in [10] and x[0] != 255:  # GPS data with fix
 
             def convert_deg(b):
-                return int.from_bytes(b, byteorder="little", signed=True) / 10**7 * 256.0
+                return int.from_bytes(b, byteorder="little", signed=True) / 10 ** 7 * 256.0
 
             data["lat"], data["lon"] = convert_deg(x[0:3]), convert_deg(x[3:6])
         if _id in [20, 21, 22, 23]:  # mV
@@ -85,15 +83,15 @@ def parse_sensornode(hex_str, port=None) -> dict:
     return data
 
 
-def decode_hex(hex_str: str, port: int = None) -> dict:
+def decode_hex(hex_str: str, port: int) -> dict:
     """
     Decode hex string payload from LoRaWAN network.
     Return a dict containing sensor data.
     """
-    return parse_sensornode(hex_str, port=port)
+    return parse_sensornode(hex_str, port)
 
 
-def create_datalines(hex_str: str, time_str: Optional[str] = None, port: Optional[int] = None) -> list:
+def create_datalines(hex_str: str, port: int, time_str: Optional[str] = None) -> list:
     """
     Return well-known parsed data formatted list of data, e.g.
 
@@ -114,19 +112,27 @@ def create_datalines(hex_str: str, time_str: Optional[str] = None, port: Optiona
     return datalines
 
 
+def main(samples: list):
+    now = datetime.datetime(2022, 3, 2, 12, 21, 30, 123000, tzinfo=ZoneInfo("UTC")).isoformat()
+    if len(sys.argv) == 3:
+        print(json.dumps(create_datalines(sys.argv[1], int(sys.argv[2]), now), indent=2))
+    else:
+        print("Some examples:")
+        for s in samples:
+            try:
+                print(json.dumps(create_datalines(s[0], s[1], now), indent=2))
+            except ValueError as err:
+                print(f"Invalid FPort '{s[1]}' or payload size {len(s[0])}: {err}")
+        print(f"\nUsage: {sys.argv[0]} hex_payload port\n\n")
+
+
 if __name__ == "__main__":
+    import json
     import sys
 
-    now = datetime.datetime(2022, 3, 2, 12, 21, 30, 123000, tzinfo=ZoneInfo("UTC")).isoformat()
-    try:
-        print(parse_sensornode(sys.argv[1], sys.argv[2]))
-    except IndexError as err:
-        print("Some examples:")
-        for s in [
-            ("01e32337f80e14941228ba01295701", 10),
-            ("ffffffffffff2b840846299108143414", 10),
-            ("0d0016090028b30b143414", 21),
-        ]:
-            print(create_datalines(s[0], time_str=now, port=s[1]))
-
-        print(f"\nUsage: {sys.argv[0]} hex_payload port\n\n")
+    examples = [
+        ["01e32337f80e14941228ba01295701", 10],
+        ["ffffffffffff2b840846299108143414", 10],
+        ["0d0016090028b30b143414", 21],
+    ]
+    main(examples)
