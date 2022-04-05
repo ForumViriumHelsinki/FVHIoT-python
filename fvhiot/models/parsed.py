@@ -49,9 +49,9 @@ Sample data:
 """
 
 
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, List, Union, Tuple
 
-from device import Device
+from fvhiot.models.device import Device
 
 from pydantic import BaseModel, validator, Extra
 
@@ -93,7 +93,13 @@ class ParsedData(BaseModel, extra=Extra.forbid):
     def check_time_fields(cls, list_vals: List[dict]) -> List[dict]:
         allowed_sets = set([frozenset(["time"]), frozenset(["start_time", "end_time"])])
         found_set = set()
-        err_msg = "Data must contain time field combinations: ('time') XOR ('start_time' AND 'end_time')"
+
+        def error_message(found_set: set) -> Tuple[str, List[str]]:
+            list_allowed_sets = [set(x) for x in list(allowed_sets)]
+            err_msg = f"Data must contain time field combinations: {list_allowed_sets[0]} XOR {list_allowed_sets[1]}."
+            err_msg += f" Found: {found_set}"
+            return err_msg, list(found_set)
+
         for v in list_vals:
             if "time" in v:
                 found_set.add("time")
@@ -101,7 +107,5 @@ class ParsedData(BaseModel, extra=Extra.forbid):
                 found_set.add("start_time")
             if "end_time" in v:
                 found_set.add("end_time")
-            assert (
-                found_set in allowed_sets
-            ), f"Mutual exclusivity / missing field error. Found {list(found_set)} time fields. {err_msg}"
+            assert found_set in allowed_sets, error_message(found_set)
         return list_vals
