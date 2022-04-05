@@ -1,6 +1,5 @@
 import datetime
 
-from optparse import Option
 from typing import Optional, List
 
 from pydantic import BaseModel
