@@ -1,20 +1,33 @@
-from __future__ import annotations  # Python 3.9 compatibility
-
 import asyncio
 import logging
 import os
+
+from typing import List
 
 import certifi
 
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer, TopicPartition
 from aiokafka.errors import NoBrokersAvailable
 from aiokafka.helpers import create_ssl_context
+from aiokafka.structs import RecordMetadata
 
-# New try 03/2022 here:
+
+def on_send_success(record_metadata: RecordMetadata):
+    """Log send success"""
+    logging.info(
+        "Successfully sent to topic {}, partition {}, offset {}".format(
+            record_metadata.topic, record_metadata.partition, record_metadata.offset
+        )
+    )
+
+
+def on_send_error(excp):
+    """Log send error"""
+    logging.error("Error on Kafka producer", exc_info=excp)
 
 
 async def get_aiokafka_producer(
-    bootstrap_servers: list[str] = None,
+    bootstrap_servers: List[str] = None,
     security_protocol: str = None,
     ssl_cafile: str = None,
     ssl_certfile: str = None,
@@ -69,8 +82,8 @@ async def get_aiokafka_producer_by_envs():
 
 
 async def get_aiokafka_consumer(
-    topics: list[str],
-    bootstrap_servers: list[str] = None,
+    topics: List[str],
+    bootstrap_servers: List[str] = None,
     security_protocol: str = None,
     ssl_cafile: str = None,
     ssl_certfile: str = None,
@@ -112,7 +125,7 @@ async def get_aiokafka_consumer(
 
 
 async def get_aiokafka_consumer_by_envs(
-    topics: list[str], auto_offset_reset: str = "latest", enable_auto_commit: bool = False, offset: int = 0
+    topics: List[str], auto_offset_reset: str = "latest", enable_auto_commit: bool = False, offset: int = 0
 ):
     """
     Create and return KafkaConsumer, which is initialized by values from environment variables.
