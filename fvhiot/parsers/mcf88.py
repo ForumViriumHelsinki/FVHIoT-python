@@ -60,7 +60,7 @@ def get_timestamp(value: bytes) -> datetime.datetime:
     return dt
 
 
-def parse_mcf88(hex_str: str, port=None) -> Optional[list]:
+def parse_mcf88(hex_str: str, port: int) -> Optional[list]:
     """
     Parse MCF88 hex payload like
     "0462651527da078e4d8e01a4691527dd078f488e01676d1527e9078d1a8e015d" to float values.
@@ -69,7 +69,7 @@ def parse_mcf88(hex_str: str, port=None) -> Optional[list]:
     if hex_str[:2] == "04":
         line = hex_str[2:62]
         n = 20
-        datas = [line[i: i + n] for i in range(0, len(line), n)]
+        datas = [line[i : i + n] for i in range(0, len(line), n)]
         datalines = []
         for data in datas:
             value = bytes.fromhex(data)
@@ -85,21 +85,19 @@ def parse_mcf88(hex_str: str, port=None) -> Optional[list]:
             # TODO: should we pydantic model DataLine for this?
             dataline = {"time": ts.isoformat(), "data": parsed_data}
             datalines.append(dataline)
-        # import json
-        # print(json.dumps(datalines, indent=2))
         return datalines
     return None
 
 
-def decode_hex(hex_str: str, port: int = None):
+def decode_hex(hex_str: str, port: int) -> Optional[list]:
     """
     Decode hex string payload from LoRaWAN network.
     Return a dict containing sensor data.
     """
-    return parse_mcf88(hex_str, port=port)
+    return parse_mcf88(hex_str, port)
 
 
-def create_datalines(hex_str: str, time_str: Optional[str] = None, port: Optional[int] = None) -> list:
+def create_datalines(hex_str: str, port: int, time_str: Optional[str] = None) -> list:
     """
     Return well-known parsed data formatted list of data.
     See an example in the header of this file or run this module.
@@ -107,18 +105,27 @@ def create_datalines(hex_str: str, time_str: Optional[str] = None, port: Optiona
     return decode_hex(hex_str, port=port)
 
 
+def main(samples: list):
+    now = datetime.datetime(2022, 3, 2, 12, 21, 30, 123000, tzinfo=ZoneInfo("UTC")).isoformat()
+    if len(sys.argv) == 3:
+        print(json.dumps(create_datalines(sys.argv[1], int(sys.argv[2]), now), indent=2))
+    else:
+        print("Some examples:")
+        for s in samples:
+            try:
+                print(json.dumps(create_datalines(s[0], s[1], now), indent=2))
+            except ValueError as err:
+                print(f"Invalid FPort '{s[1]}' or payload size {len(s[0])}: {err}")
+        print(f"\nUsage: {sys.argv[0]} hex_payload port\n\n")
+
+
 if __name__ == "__main__":
+    import json
     import sys
 
-    try:
-        print(decode_hex(sys.argv[1], int(sys.argv[2])))
-    except IndexError as err:
-        print("Some examples:")
-        for s in [
-            ("04d276522a44fcb3649001147b522a3cfcb6579001d77e522a22fcb72e900152", 2),
-            ("04bd79522a2ffcc8869001827d522a06fcc8549001c481522a12fcc84190015b", 2),
-            ("042279522a68fca5489101e57c522a72fca62191012781522a6efca60691015c", 2),
-        ]:
-            print(create_datalines(s[0], port=s[1]))
-
-        print(f"\nUsage: {sys.argv[0]} hex_payload port\n\n")
+    examples = [
+        ("04d276522a44fcb3649001147b522a3cfcb6579001d77e522a22fcb72e900152", 2),
+        ("04bd79522a2ffcc8869001827d522a06fcc8549001c481522a12fcc84190015b", 2),
+        ("042279522a68fca5489101e57c522a72fca62191012781522a6efca60691015c", 2),
+    ]
+    main(examples)
