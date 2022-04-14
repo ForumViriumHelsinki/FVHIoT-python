@@ -63,7 +63,7 @@ def parse_fvhgeneric(hex_str, port=None) -> dict:
     return data
 
 
-def decode_hex(hex_str: str, port: int = None) -> dict:
+def decode_hex(hex_str: str, port: int) -> dict:
     """
     Decode hex string payload from LoRaWAN network.
     Return a dict containing sensor data.
@@ -71,7 +71,7 @@ def decode_hex(hex_str: str, port: int = None) -> dict:
     return parse_fvhgeneric(hex_str, port=port)
 
 
-def create_datalines(hex_str: str, time_str: Optional[str] = None, port: Optional[int] = None) -> list:
+def create_datalines(hex_str: str, port: int, time_str: Optional[str] = None) -> list:
     """
     Return well-known parsed data formatted list of data, e.g.
 
@@ -93,22 +93,29 @@ def create_datalines(hex_str: str, time_str: Optional[str] = None, port: Optiona
     return datalines
 
 
-if __name__ == "__main__":
-    import sys
-    import json
-
+def main(samples: list):
     now = datetime.datetime(2022, 3, 2, 12, 21, 30, 123000, tzinfo=ZoneInfo("UTC")).isoformat()
-    try:
-        print(parse_fvhgeneric(sys.argv[1], sys.argv[2]))
-    except IndexError as err:
+    if len(sys.argv) == 3:
+        print(json.dumps(create_datalines(sys.argv[1], int(sys.argv[2]), now), indent=2))
+    else:
         print("Some examples:")
-        for s in [
-            ("0aa6e12307f20e1483cc57625010", 0),
-            ("0aaae12306f20e14f5d757625001", 0),  # button 1
-            ("0ab0e12300f20e143dd857625002", 0),  # button 2
-            ("0ab3e12305f20e1487d857625004", 0),  # button 3
-            ("0ab0e12305f20e1403d9576250aa", 0),  # button 2,4,6,8
-        ]:
-            print(json.dumps(create_datalines(s[0], time_str=now, port=s[1]), indent=2))
-
+        for s in samples:
+            try:
+                print(json.dumps(create_datalines(s[0], s[1], now), indent=2))
+            except ValueError as err:
+                print(f"Invalid FPort '{s[1]}' or payload size {len(s[0])}: {err}")
         print(f"\nUsage: {sys.argv[0]} hex_payload port\n\n")
+
+
+if __name__ == "__main__":
+    import json
+    import sys
+
+    examples = [
+        ("0aa6e12307f20e1483cc57625010", 0),
+        ("0aaae12306f20e14f5d757625001", 0),  # button 1
+        ("0ab0e12300f20e143dd857625002", 0),  # button 2
+        ("0ab3e12305f20e1487d857625004", 0),  # button 3
+        ("0ab0e12305f20e1403d9576250aa", 0),  # button 2,4,6,8
+    ]
+    main(examples)
