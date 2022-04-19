@@ -55,7 +55,7 @@ def parse_fvhgeneric(hex_str, port=None) -> dict:
             data["epoch"] = int.from_bytes(b, byteorder="little", signed=True)
         elif 80 <= id_ <= 89:  # buttons, id 80-89
             nr = id_ % 10  # 0-9
-            data[f"button{nr}"] = "{0:08b}".format(int(chunk, 16))
+            data[f"button{nr}"] = int(chunk, 16)
         else:
             pass
         if len(hex_str) == 0:
