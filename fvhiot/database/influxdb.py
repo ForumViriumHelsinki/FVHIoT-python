@@ -14,7 +14,7 @@ def get_influxdb_args(env: bool = False) -> Tuple[str, str, str, str]:
     """
     Parse InfluxDB connection parameters from command line arguments or get them from envs.
 
-    :param env:
+    :param env: True, if get arguments from envs.
     :return: url, token, org, bucket
     """
     if env:
