@@ -55,6 +55,8 @@ def parse_sensornode(hex_str: str, port: int) -> dict:
         # Remove next chunk from hex payload
         chunk = hex_str[:s]
         hex_str = hex_str[s:]
+        if len(hex_str) == 0:
+            break
         if _id in [1]:  # List contains fields not to parse
             # Get and remove next id from hex payload
             _id = int(hex_str[:2], 16)
@@ -67,17 +69,15 @@ def parse_sensornode(hex_str: str, port: int) -> dict:
                 return int.from_bytes(b, byteorder="little", signed=True) / 10 ** 7 * 256.0
 
             data["lat"], data["lon"] = convert_deg(x[0:3]), convert_deg(x[3:6])
-        if _id in [20, 21, 22, 23]:  # mV
+        elif _id in [20, 21, 22, 23]:  # mV
             data[t["table"]] = struct.unpack("<H", x)[0] / 1000
-        if _id in [30, 31, 32, 33]:  # count
+        elif _id in [30, 31, 32, 33]:  # count
             data[t["table"]] = struct.unpack("<H", x)[0]
-        if _id in [40, 41, 42]:  # °C * 100
+        elif _id in [40, 41, 42]:  # °C * 100
             data[t["table"]] = struct.unpack("<h", x)[0] / 100
-        if _id in [43]:  # temp & humidity
+        elif _id in [43]:  # temp & humidity
             data["temprh_temp"] = struct.unpack("<h", x[:2])[0] / 100
             data["temprh_rh"] = x[2] / 2
-        if len(hex_str) == 0:
-            break
         _id = int(hex_str[:2], 16)
         hex_str = hex_str[2:]
     return data
@@ -131,6 +131,7 @@ if __name__ == "__main__":
     import sys
 
     examples = [
+        ["90e12357f20e0140010205", 10],
         ["01e32337f80e14941228ba01295701", 10],
         ["ffffffffffff2b840846299108143414", 10],
         ["0d0016090028b30b143414", 21],
