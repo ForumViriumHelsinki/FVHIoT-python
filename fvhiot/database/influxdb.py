@@ -1,6 +1,7 @@
 import argparse
 import collections
 import datetime
+import logging
 import os
 import time
 from typing import Optional, Tuple
@@ -18,7 +19,7 @@ def get_influxdb_args(env: bool = False) -> Tuple[str, str, str, str]:
     :return: url, token, org, bucket
     """
     if env:
-        return (
+        url, token, org, bucket = (
             os.getenv("INFLUXDB_URL"),
             os.getenv("INFLUXDB_TOKEN"),
             os.getenv("INFLUXDB_ORG"),
@@ -31,7 +32,9 @@ def get_influxdb_args(env: bool = False) -> Tuple[str, str, str, str]:
         parser.add_argument("--org", help="InfluxDB organization", required=True)
         parser.add_argument("--bucket", help="InfluxDB bucket name", required=True)
         args = parser.parse_args()
-        return args.url, args.token, args.org, args.bucket
+        url, token, org, bucket =  args.url, args.token, args.org, args.bucket
+    logging.info(f"Got InfluxDB parameters url={url}, token={token}, org={org}, bucket={bucket}")
+    return url, token, org, bucket
 
 
 def create_influxdb_client(url: str, token: str, org: str) -> InfluxDBClient:
