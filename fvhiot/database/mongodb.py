@@ -5,6 +5,7 @@ from typing import Tuple
 from pymongo import MongoClient
 from pymongo.collection import Collection
 from pymongo.database import Database
+from pymongo.server_api import ServerApi
 
 
 def get_mongoclient_by_envs() -> MongoClient:
@@ -13,7 +14,7 @@ def get_mongoclient_by_envs() -> MongoClient:
     """
     database_uri = os.getenv("MONGODB_DATABASE_URI", "mongodb://localhost:27017/")
     logging.info(f"Connecting to MongoDB: {database_uri}")
-    client: MongoClient = MongoClient(database_uri, tz_aware=True)
+    client: MongoClient = MongoClient(database_uri, tz_aware=True, server_api=ServerApi("1"))
     return client
 
 
@@ -27,7 +28,7 @@ def get_database(client: MongoClient, db_name: str) -> Database:
 
 
 def get_timeseries_collection(
-        db: Database, collection_name: str, granularity: str = "minutes"
+    db: Database, collection_name: str, granularity: str = "minutes"
 ) -> Tuple[Collection, bool]:
     """
     Use MongoDB Database instance db and collection_name to get and return a collection.
@@ -41,8 +42,5 @@ def get_timeseries_collection(
         coll = db.create_collection(
             collection_name, timeseries={"timeField": "time", "metaField": "meta", "granularity": granularity}
         )
-        # coll = db.command(
-        #     "create", collection_name, timeseries={"timeField": "time", "metaField": "meta", "granularity": granularity}
-        # )
         created = True
     return coll, created
