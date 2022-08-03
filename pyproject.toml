@@ -6,6 +6,11 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
+name = "FVH-IoT"
+description = "Utilities for FVH's IoT projects"
+authors = [
+    { name = "Aapo Rista", email = "aapo.rista@forumvirium.fi" }
+]
 dependencies = [
     'Flask',
     'starlette',
