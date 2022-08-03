@@ -6,7 +6,7 @@ requires = [
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "FVH-IoT"
+name = "FVHIoT"
 description = "Utilities for FVH's IoT projects"
 version = "0.3.0"
 authors = [
