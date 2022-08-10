@@ -1,43 +1,52 @@
 import argparse
-import datetime
 import logging
 import os
-import time
-from typing import Optional, Tuple
-from zoneinfo import ZoneInfo
+from typing import Tuple
 
 from influxdb import InfluxDBClient as InfluxDBClient_v1
 
 
-def get_influxdb_args_v1(env: bool = False) -> Tuple[str, str, str, str, str, bool, bool]:
+def get_influxdb_args_v1() -> Tuple[str, int, str, str, str, bool, bool]:
     """
     Parse InfluxDB connection parameters from command line arguments or get them from envs.
 
     :param env: True, if arguments should be taken from envs.
     :return: host, port, database, user, password
     """
-    if env:
-        host, port, database, username, password, ssl, verify_ssl = (
-            os.getenv("INFLUXDB_HOST"),
-            os.getenv("INFLUXDB_PORT"),
-            os.getenv("INFLUXDB_DATABASE"),
-            os.getenv("INFLUXDB_USERNAME"),
-            os.getenv("INFLUXDB_PASSWORD"),
-            True if os.getenv("INFLUXDB_SSL") is not None else False,
-            True if os.getenv("INFLUXDB_VERIFY_SSL") is not None else False,
-        )
-    else:
-        parser = argparse.ArgumentParser()
-        parser.add_argument("--host", help="InfluxDB host", required=True)
-        parser.add_argument("--port", help="InxluxDB port", default="8086", required=False)
-        parser.add_argument("--database", help="InfluxDB database", required=True)
-        parser.add_argument("--username", help="InfluxDB username", required=False)
-        parser.add_argument("--password", help="InfluxDB password", required=False)
-        parser.add_argument("--ssl", help="Use SSL", action="store_true")
-        parser.add_argument("--verify_ssl", help="Verify SSL certificate", action="store_true")
-        args = parser.parse_args()
-        host, port, database, username, password = args.host, args.port, args.database, args.username, args.password
-        ssl, verify_ssl = args.ssl, args.verify_ssl
+    ssl = (True if os.getenv("INFLUXDB_SSL") is not None else False,)
+    verify_ssl = (True if os.getenv("INFLUXDB_VERIFY_SSL") is not None else False,)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--influxdb-host", help="InfluxDB host", default=os.getenv("INFLUXDB_HOST"))
+    parser.add_argument(
+        "--influxdb-port", help="InxluxDB port", default=int(os.getenv("INFLUXDB_PORT", 8086)), type=int
+    )
+    parser.add_argument("--influxdb-database", help="InfluxDB database", default=os.getenv("INFLUXDB_DATABASE"))
+    parser.add_argument(
+        "--influxdb-username", help="InfluxDB username", default=os.getenv("INFLUXDB_USERNAME"), required=False
+    )
+    parser.add_argument(
+        "--influxdb-password", help="InfluxDB password", default=os.getenv("INFLUXDB_PASSWORD"), required=False
+    )
+    parser.add_argument("--influxdb-ssl", help="Use SSL", default=ssl, action="store_true")
+    parser.add_argument("--influxdb-verify-ssl", help="Verify SSL certificate", default=verify_ssl, action="store_true")
+    args, unknown = parser.parse_known_args()
+    # Check that mandatory variables are present
+    args_dict = vars(args)
+    for arg in ["INFLUXDB_HOST", "INFLUXDB_PORT", "INFLUXDB_DATABASE"]:
+        if args_dict[arg.lower()] is None:
+            raise RuntimeError(
+                "Parameter missing: add --{} or {} environment variable".format(arg.lower().replace("_", "-"), arg)
+            )
+
+    host, port, database, username, password, ssl, verify_ssl = (
+        args.influxdb_host,
+        args.influxdb_port,
+        args.influxdb_database,
+        args.influxdb_username,
+        args.influxdb_password,
+        args.influxdb_ssl,
+        args.influxdb_verify_ssl,
+    )
     pw = "None" if password is None else "*****"
     logging.info(
         f"Got InfluxDB parameters host={host}, port={port}, database={database}, username={username}, password={pw}"
@@ -46,42 +55,16 @@ def get_influxdb_args_v1(env: bool = False) -> Tuple[str, str, str, str, str, bo
 
 
 def create_influxdb_client_v1(
-    host: str, port: str, database: str, username: str, password: str, ssl: bool, verify_ssl: bool
+    host: str, port: int, database: str, username: str, password: str, ssl: bool, verify_ssl: bool
 ) -> InfluxDBClient_v1:
     """
-    Initialize InfluxDBClient using host, database and optionally username and password.
+    Initialize InfluxDBClient using host, database and optional username and password.
     """
     return InfluxDBClient_v1(
         host=host, port=port, database=database, username=username, password=password, ssl=ssl, verify_ssl=verify_ssl
     )
 
 
-def create_influxdb_dict(
-    dev_id: str, measurement_name: str, fields: dict, tags: Optional[dict], timestamp: Optional[datetime.datetime]
-) -> dict:
-    """
-    Convert arguments to a valid InfluxDB measurement dict.
-
-    :param dev_id: device id, mandatory tag for InfluxDB
-    :param measurement_name:
-    :param fields: dict containing metrics
-    :param tags: dict containing additional tags
-    :param timestamp: timezone aware datetime
-    :return: valid InfluxDB line protocol string
-    """
-    if timestamp is None:
-        timestamp = datetime.datetime.now(ZoneInfo("UTC"))
-    else:
-        # Make sure datetime is timezone aware and in UTC time
-        timestamp = timestamp.astimezone(ZoneInfo("UTC"))
-    if tags is None:
-        tags = {}
-    # For historical reasons the main identifier (tag) is "dev-id"
-    tags.update({"dev-id": dev_id})
-    return {"measurement": measurement_name, "tags": tags, "fields": fields, "time": "{}".format(timestamp.isoformat())}
-
-
-# The query that connects to influxDB
 def test_query_v1(client: InfluxDBClient_v1):
     """
     Test connection to InfluxDB 1.x Database.
@@ -94,7 +77,6 @@ def test_query_v1(client: InfluxDBClient_v1):
             print(measure)
 
 
-# This function is called from the main.py module. [url, token, org] are in separate module called credits.py
 def main():
     host, port, database, username, password, ssl, verify_ssl = get_influxdb_args_v1()
     c = create_influxdb_client_v1(host, port, database, username, password, ssl, verify_ssl)

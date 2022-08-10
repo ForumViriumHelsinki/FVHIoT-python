@@ -11,29 +11,32 @@ from influxdb_client import InfluxDBClient
 from influxdb_client.client.write_api import SYNCHRONOUS
 
 
-def get_influxdb_args(env: bool = False) -> Tuple[str, str, str, str]:
+def get_influxdb_args() -> Tuple[str, str, str, str]:
     """
     Parse InfluxDB connection parameters from command line arguments or get them from envs.
 
     :param env: True, if get arguments from envs.
     :return: url, token, org, bucket
     """
-    if env:
-        url, token, org, bucket = (
-            os.getenv("INFLUXDB_URL"),
-            os.getenv("INFLUXDB_TOKEN"),
-            os.getenv("INFLUXDB_ORG"),
-            os.getenv("INFLUXDB_BUCKET"),
-        )
-    else:
-        parser = argparse.ArgumentParser()
-        parser.add_argument("--url", help="InfluxDB url", required=True)
-        parser.add_argument("--token", help="InxluxDB token", required=True)
-        parser.add_argument("--org", help="InfluxDB organization", required=True)
-        parser.add_argument("--bucket", help="InfluxDB bucket name", required=True)
-        args = parser.parse_args()
-        url, token, org, bucket =  args.url, args.token, args.org, args.bucket
-    logging.info(f"Got InfluxDB parameters url={url}, token={token}, org={org}, bucket={bucket}")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--influxdb-url", help="InfluxDB url", default=os.getenv("INFLUXDB_URL"), required=False)
+    parser.add_argument("--influxdb-token", help="InxluxDB token", default=os.getenv("INFLUXDB_TOKEN"), required=False)
+    parser.add_argument(
+        "--influxdb-org", help="InfluxDB organization", default=os.getenv("INFLUXDB_ORG"), required=False
+    )
+    parser.add_argument(
+        "--influxdb-bucket", help="InfluxDB bucket name", default=os.getenv("INFLUXDB_BUCKET"), required=False
+    )
+    args, unknown = parser.parse_known_args()
+    args_dict = vars(args)
+    # Check that mandatory variables are present
+    for arg in ["INFLUXDB_URL", "INFLUXDB_TOKEN", "INFLUXDB_ORG", "INFLUXDB_BUCKET"]:
+        if args_dict[arg.lower()] is None:
+            raise RuntimeError(
+                "Parameter missing: add --{} or {} environment variable".format(arg.lower().replace("_", "-"), arg)
+            )
+    url, token, org, bucket = args.influxdb_url, args.influxdb_token, args.influxdb_org, args.influxdb_bucket
+    logging.info(f"Got InfluxDB parameters url={url}, token=*****, org={org}, bucket={bucket}")
     return url, token, org, bucket
 
 
@@ -81,7 +84,12 @@ def create_influxdb_line(
 
 
 def create_influxdb_dict(
-    dev_id: str, measurement_name: str, fields: dict, tags: Optional[dict], timestamp: Optional[datetime.datetime]
+    dev_id: str,
+    measurement_name: str,
+    fields: dict,
+    tags: Optional[dict],
+    timestamp: Optional[datetime.datetime],
+    convert_floats: bool = False,
 ) -> dict:
     """
     Convert arguments to a valid InfluxDB measurement dict.
@@ -91,17 +99,19 @@ def create_influxdb_dict(
     :param fields: dict containing metrics
     :param tags: dict containing additional tags
     :param timestamp: timezone aware datetime
-    :return: valid InfluxDB line protocol string
+    :param convert_floats: True if all values should be converted to floats
+    :return: valid InfluxDB dict object
     """
     if timestamp is None:
-        time_int = int(time.time() * 10**9)
         timestamp = datetime.datetime.now(ZoneInfo("UTC"))
     else:
         # Make sure datetime is timezone aware and in UTC time
         timestamp = timestamp.astimezone(ZoneInfo("UTC"))
-        time_int = int(timestamp.timestamp() * 10**9)  # epoch in nanoseconds
     if tags is None:
         tags = {}
+    if convert_floats:
+        for k, v in fields.items():  # Convert all fields to floats
+            fields[k] = float(v)
     # For historical reasons the main identifier (tag) is "dev-id"
     tags.update({"dev-id": dev_id})
     return {"measurement": measurement_name, "tags": tags, "fields": fields, "time": "{}".format(timestamp.isoformat())}
