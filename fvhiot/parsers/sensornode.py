@@ -1,6 +1,7 @@
 """
 Parser for Digital Matter's Sensornode data format
-https://digmat.freshdesk.com/helpdesk/attachments/16046195706
+https://support.digitalmatter.com/helpdesk/attachments/16090302599
+https://support.digitalmatter.com/support/solutions/articles/16000079347-sensornode-payload-decoding-examples
 """
 import datetime
 import struct
