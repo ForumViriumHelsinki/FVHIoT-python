@@ -21,13 +21,14 @@ class Alr(BaseModel):
 
 
 class CustomerData(BaseModel):
-    __root__: Dict[str, Alr]
+    alr: Alr
 
 
 class DevEuiUplink(BaseModel):
     """
     Complete DevEUI_uplink data packet from Thingpark system.
     """
+
     Time: str  # "2022-02-10T06:59:28.171+00:00",
     DevEUI: str  # "1234D57BA000ABCD",
     FPort: int  # 1,
@@ -50,7 +51,7 @@ class DevEuiUplink(BaseModel):
     LrrLAT: Optional[float]  # 60.170341,
     LrrLON: Optional[float]  # 24.948341,
     CustomerID: str  # "100001234",
-    CustomerData: CustomerData  # {"alr": {"pro": "declab/mb7386", "ver": "1"}},
+    CustomerData: CustomerData  # {"loc": null, "alr": {"pro": "LORA/Generic", "ver": "1"}, "tags":[],"doms":[]}
     ModelCfg: str  # "0",
     DevAddr: str  # "E002ABCD",
     TxPower: float  # 14.0,
