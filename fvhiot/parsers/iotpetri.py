@@ -37,9 +37,10 @@ def parse_paxcounter(hex_str: str, port: int) -> dict:
     data = {}
     batt_raw = int(hex_str[:2], 16)
     data["batt"] = batt_raw * 8 + 2500
-    data["ble_count"] = int(hex_str[2:6], 16)
-    data["ble_new"] = int(hex_str[6:10], 16)
-    data["ble_stay"] = int(hex_str[10:14], 16)
+    if len(hex_str) > 2:
+        data["ble_count"] = int(hex_str[2:6], 16)
+        data["ble_new"] = int(hex_str[6:10], 16)
+        data["ble_stay"] = int(hex_str[10:14], 16)
     return data
 
 
@@ -98,5 +99,7 @@ if __name__ == "__main__":
         ["58000b00000025", 1],  # example data
         ["58000b00000021", 1],  # example data
         ["5800040001000c", 1],  # example data
+        ["58", 1],  # example data, battery empty
+        ["57", 1],  # example data, battery empty
     ]
     main(examples)
