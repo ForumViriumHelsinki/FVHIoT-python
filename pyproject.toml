@@ -5,6 +5,9 @@ requires = [
 ]
 build-backend = "setuptools.build_meta"
 
+[tool.black]
+line-length = 120
+
 [project]
 name = "FVHIoT"
 description = "Utilities for FVH's IoT projects"
