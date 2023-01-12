@@ -1,0 +1,11 @@
+repos:
+  - repo: https://github.com/psf/black
+    rev: 22.6.0
+    hooks:
+      - id: black
+        args: [ --line-length=120 ]
+  - repo: https://github.com/charliermarsh/ruff-pre-commit
+    rev: 'v0.0.218'
+    hooks:
+      - id: ruff
+        args: ["--force-exclude", --line-length, "120"]
