@@ -13,8 +13,8 @@ def get_influxdb_args_v1() -> Tuple[str, int, str, str, str, bool, bool]:
     :param env: True, if arguments should be taken from envs.
     :return: host, port, database, user, password
     """
-    ssl = (True if os.getenv("INFLUXDB_SSL") is not None else False,)
-    verify_ssl = (True if os.getenv("INFLUXDB_VERIFY_SSL") is not None else False,)
+    ssl = True if os.getenv("INFLUXDB_SSL") is not None else False
+    verify_ssl = True if os.getenv("INFLUXDB_VERIFY_SSL") is not None else False
     parser = argparse.ArgumentParser()
     parser.add_argument("--influxdb-host", help="InfluxDB host", default=os.getenv("INFLUXDB_HOST"))
     parser.add_argument(
@@ -49,7 +49,8 @@ def get_influxdb_args_v1() -> Tuple[str, int, str, str, str, bool, bool]:
     )
     pw = "None" if password is None else "*****"
     logging.info(
-        f"Got InfluxDB parameters host={host}, port={port}, database={database}, username={username}, password={pw}"
+        f"Got InfluxDB parameters host={host}, port={port}, database={database}, username={username}, "
+        f"password={pw} ssl {ssl}/{verify_ssl}"
     )
     return host, port, database, username, password, ssl, verify_ssl
 
@@ -78,6 +79,7 @@ def test_query_v1(client: InfluxDBClient_v1):
 
 
 def main():
+    logging.basicConfig(format="%(asctime)s %(levelname)-8s %(message)s", level=getattr(logging, "DEBUG"))
     host, port, database, username, password, ssl, verify_ssl = get_influxdb_args_v1()
     c = create_influxdb_client_v1(host, port, database, username, password, ssl, verify_ssl)
     test_query_v1(c)
