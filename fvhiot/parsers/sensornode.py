@@ -1,6 +1,7 @@
 """
 Parser for Digital Matter's Sensornode data format
-https://digmat.freshdesk.com/helpdesk/attachments/16046195706
+https://support.digitalmatter.com/helpdesk/attachments/16090302599
+https://support.digitalmatter.com/support/solutions/articles/16000079347-sensornode-payload-decoding-examples
 """
 import datetime
 import struct
@@ -9,6 +10,7 @@ from zoneinfo import ZoneInfo
 
 SENSORNODE_CSV = """ID;Table;Name;Size;Units
 1;;System Firmware version (reset message);4;Struct
+2;;Debug Statistics;TBD;Struct
 10;;GPS Position;6;Struct
 20;batt;Battery Voltage;2;UINT16 (mV)
 21;analog1;Analog In 1;2; UINT16 (mV)
@@ -47,6 +49,8 @@ def parse_sensornode(hex_str: str, port: int) -> dict:
     Return a dict containing sensor data.
     """
     _id = port
+    if _id == 2:  # Debug statistics message
+        return {}
     tab = parse_sensornode_table()
     data = {}
     while len(hex_str) >= 0:
@@ -135,5 +139,6 @@ if __name__ == "__main__":
         ["01e32337f80e14941228ba01295701", 10],
         ["ffffffffffff2b840846299108143414", 10],
         ["0d0016090028b30b143414", 21],
+        ["041528c22ea00000000000d72bc22ea000000000001a30c22ea0000000000000", 2],
     ]
     main(examples)

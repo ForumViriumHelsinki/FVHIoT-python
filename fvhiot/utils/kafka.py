@@ -100,7 +100,6 @@ def get_kafka_consumer(
     else:
         logging.info(f"Creating KafkaConsumer with group_id '{group_id}' and not seeking")
         kc = KafkaConsumer(
-            topic,
             bootstrap_servers=bootstrap_servers,
             security_protocol=security_protocol,
             ssl_cafile=ssl_cafile or certifi.where(),
@@ -112,6 +111,10 @@ def get_kafka_consumer(
             group_id=group_id,
             enable_auto_commit=enable_auto_commit,
         )
+        if not isinstance(topic, (list, tuple)):
+            topic = [topic]
+        logging.info("Subscribing to topics {}".format(",".join(topic)))
+        kc.subscribe(topic)
     return kc
 
 

@@ -49,7 +49,7 @@ Sample data:
 """
 
 
-from typing import Any, Dict, List, Union, Tuple
+from typing import Any, Dict, List, Union, Tuple, Optional
 
 from fvhiot.models.device import Device
 
@@ -58,7 +58,7 @@ from pydantic import BaseModel, validator, Extra
 
 class Column(BaseModel, extra=Extra.forbid):
     name: str
-    unit: str
+    unit: Optional[str]
 
 
 class Header(BaseModel, extra=Extra.forbid):
@@ -91,7 +91,7 @@ class ParsedData(BaseModel, extra=Extra.forbid):
 
     @validator("data", pre=True)
     def check_time_fields(cls, list_vals: List[dict]) -> List[dict]:
-        allowed_sets = set([frozenset(["time"]), frozenset(["start_time", "end_time"])])
+        allowed_sets = {frozenset(["time"]), frozenset(["start_time", "end_time"])}
         found_set = set()
 
         def error_message(found_set: set) -> Tuple[str, List[str]]:
