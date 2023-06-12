@@ -53,7 +53,7 @@ async def get_aiokafka_producer(
     return kp
 
 
-async def get_aiokafka_producer_by_envs():
+async def get_aiokafka_producer_by_envs(**kwargs) -> AIOKafkaProducer:
     """
     Create and return Kafkaproducer, which is initialized by values from environment variables.
     At least these variables must usually be defined to make the connection to brokers:
@@ -74,6 +74,7 @@ async def get_aiokafka_producer_by_envs():
             sasl_mechanism=os.getenv("KAFKA_SASL_MECHANISMS"),
             sasl_plain_username=os.getenv("KAFKA_SASL_USERNAME"),
             sasl_plain_password=os.getenv("KAFKA_SASL_PASSWORD"),
+            **kwargs,
         )
         return kp
     except NoBrokersAvailable as err:
@@ -95,14 +96,26 @@ async def get_aiokafka_consumer(
     auto_offset_reset="latest",
     enable_auto_commit: bool = False,
     offset: int = 0,
-):
+    **kwargs,
+) -> AIOKafkaConsumer:
     """
-    Simply create and return a KafkaConsumer using given arguments.
+    Simply create and return a AIOKafkaConsumer using given arguments.
+    Note that sometimes it is useful to set the following parameters
+    to group a burst of messages together and thus reduce subsequently generated requests
+        fetch_max_wait_ms=15000,
+        fetch_min_bytes=100 * 1000,
+        fetch_max_bytes=1 * 1000_000,
+
     Use seek_to_offset() to subscribe to given topic(s) and seek to default offset 0.
 
     Note: the consumer is already started here, thus it suffices to simply start
           consuming messages in the main app.
     """
+    logging.info(
+        "KAFKA_BOOTSTRAP_SERVERS={}, KAFKA_GROUP_ID={}, KAFKA_SASL_USERNAME={}, TOPICS={}".format(
+            bootstrap_servers, group_id, sasl_plain_username, topics
+        )
+    )
     ssl_cafile = ssl_cafile or certifi.where()
     ssl_context = create_ssl_context(cafile=ssl_cafile, certfile=ssl_certfile, keyfile=ssl_keyfile)
     kc = AIOKafkaConsumer(
@@ -116,8 +129,9 @@ async def get_aiokafka_consumer(
         group_id=group_id,
         auto_offset_reset=auto_offset_reset,
         enable_auto_commit=enable_auto_commit,
+        loop=asyncio.get_event_loop(),
+        **kwargs,
     )
-    logging.info("Starting KafkaConsumer and subscribing to topics: {}".format(topics))
     await kc.start()
     for topic in topics:
         await seek_to_offset(kc, topic, offset)
@@ -125,7 +139,7 @@ async def get_aiokafka_consumer(
 
 
 async def get_aiokafka_consumer_by_envs(
-    topics: List[str], auto_offset_reset: str = "latest", enable_auto_commit: bool = False, offset: int = 0
+    topics: List[str], auto_offset_reset: str = "latest", enable_auto_commit: bool = False, offset: int = 0, **kwargs
 ):
     """
     Create and return KafkaConsumer, which is initialized by values from environment variables.
@@ -136,7 +150,6 @@ async def get_aiokafka_consumer_by_envs(
     KAFKA_SECURITY_PROTOCOL
     KAFKA_SASL_MECHANISMS
     """
-    logging.info("Getting KafkaConsumer: {}".format(os.getenv("KAFKA_BOOTSTRAP_SERVERS")))
     try:
         kc = await get_aiokafka_consumer(
             topics,
@@ -152,6 +165,7 @@ async def get_aiokafka_consumer_by_envs(
             auto_offset_reset=auto_offset_reset,
             enable_auto_commit=enable_auto_commit,
             offset=offset,
+            **kwargs,
         )
         return kc
     except NoBrokersAvailable as err:
