@@ -10,7 +10,7 @@ from zoneinfo import ZoneInfo
 
 SENSORNODE_CSV = """ID;Table;Name;Size;Units
 1;;System Firmware version (reset message);4;Struct
-2;;Debug Statistics;TBD;Struct
+2;;Debug Statistics;0;Struct
 10;;GPS Position;6;Struct
 20;batt;Battery Voltage;2;UINT16 (mV)
 21;analog1;Analog In 1;2; UINT16 (mV)
