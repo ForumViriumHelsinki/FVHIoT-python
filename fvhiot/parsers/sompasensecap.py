@@ -9,8 +9,9 @@ from zoneinfo import ZoneInfo
 
 
 def parse_s_sensecap(payload_hex: str, port: int) -> dict:
-    """Actual measurements come n 3 packages '30' first, '32' middle and '33' last 
-    Note: middle packet is one byte shorter form othe packets
+    """
+    Actual measurements come n 3 packages '30' first, '32' middle and '33' last
+    Note: middle packet is one byte shorter form other packets
     """
     bytebuffer = bytearray.fromhex(payload_hex)
     data = dict()
@@ -50,25 +51,18 @@ def decode_hex(hex_str: str, port: int) -> dict:
 def create_datalines(hex_str: str, port: int, time_str: Optional[str] = None) -> list:
     """
     Return well-known parsed data formatted list of data, e.g.
-
     [
       {
-        "time": "2022-03-02T12:21:30.123000+00:00",
+        "time": "2023-06-26T06:39:21.061321+00:00",
         "data": {
-          "temperature_sht_c": 26.8,
-          "humidity_sht": 35.5,
-          "temperature_ath_c: 15,
-          "humidity_ath": 20,
-          "temperature_mcp": 286.8,
-          "ref_temperature_mcp": 30.5,
+          "temperature_sht_c": 25.83,
+          "humidity_sht": 46.53,
+          "temperature_ath_c": 25.0,
+          "humidity_ath": 47.0,
+          "temperature_mcp": 25.5,
+          "ref_temperature_mcp": 25.5
         }
-      },
-      {
-        "time": "2022-03-02T12:21:32.123000+00:00",
-        "data": {
-          "battery_percentage": 85
-            }
-        }
+      }
     ]
     """
     values = decode_hex(hex_str, port)
@@ -78,7 +72,7 @@ def create_datalines(hex_str: str, port: int, time_str: Optional[str] = None) ->
 
 
 def main(samples: list):
-    now = datetime.datetime.utcnow().isoformat()
+    now = datetime.datetime.now(tz=ZoneInfo("UTC")).isoformat()
     if len(sys.argv) == 3:
         print(json.dumps(create_datalines(sys.argv[1], int(sys.argv[2]), now), indent=2))
     else:
@@ -101,7 +95,7 @@ if __name__ == "__main__":
         ("301203018a97a002c5fdd0", "3"),
         ("3234000061a80000b798", "3"),
         ("3356030183311801851960", "3"),
-        ("39600101000200050000", "3"), # battery status
-        ("3402000100", "3")  # status package not documented so igrone
+        ("39600101000200050000", "3"),  # battery status
+        ("3402000100", "3"),  # status package not documented so ignore
     ]
     main(examples)
