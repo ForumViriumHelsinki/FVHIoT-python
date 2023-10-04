@@ -26,6 +26,6 @@ dependencies = [
     'Flask',
     'starlette',
     'certifi',
-    'kafka-python',
+    'aiokafka',
     'msgpack',
 ]
