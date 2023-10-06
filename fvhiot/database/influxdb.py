@@ -16,10 +16,17 @@ def get_influxdb_args() -> Tuple[str, str, str, str]:
     Parse InfluxDB connection parameters from command line arguments or get them from envs.
 
     :param env: True, if get arguments from envs.
-    :return: url, token, org, bucket
+    :return: host, token, org, bucket
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument("--influxdb-url", help="InfluxDB url", default=os.getenv("INFLUXDB_URL"), required=False)
+    parser.add_argument("--influx-host", help="InfluxDB host", default=os.getenv("INFLUX_HOST"), required=False)
+    parser.add_argument("--influx-org", help="InfluxDB organization", default=os.getenv("INFLUX_ORG"), required=False)
+    parser.add_argument("--influx-token", help="InfluxDB token", default=os.getenv("INFLUX_TOKEN"), required=False)
+    parser.add_argument(
+        "--influx-bucket", help="InfluxDB bucket name", default=os.getenv("INFLUX_BUCKET"), required=False
+    )
+    # Deprecated args: --->
+    parser.add_argument("--influxdb-url", help="Deprecated", default=os.getenv("INFLUXDB_URL"), required=False)
     parser.add_argument("--influxdb-token", help="InxluxDB token", default=os.getenv("INFLUXDB_TOKEN"), required=False)
     parser.add_argument(
         "--influxdb-org", help="InfluxDB organization", default=os.getenv("INFLUXDB_ORG"), required=False
@@ -27,17 +34,34 @@ def get_influxdb_args() -> Tuple[str, str, str, str]:
     parser.add_argument(
         "--influxdb-bucket", help="InfluxDB bucket name", default=os.getenv("INFLUXDB_BUCKET"), required=False
     )
+    # <--- Deprecated args end
     args, unknown = parser.parse_known_args()
     args_dict = vars(args)
     # Check that mandatory variables are present
-    for arg in ["INFLUXDB_URL", "INFLUXDB_TOKEN", "INFLUXDB_ORG", "INFLUXDB_BUCKET"]:
+    missing_arg = influx2_arg = None
+    for arg in ["INFLUX_HOST", "INFLUX_TOKEN", "INFLUX_ORG", "INFLUX_BUCKET"]:
         if args_dict[arg.lower()] is None:
-            raise RuntimeError(
-                "Parameter missing: add --{} or {} environment variable".format(arg.lower().replace("_", "-"), arg)
-            )
-    url, token, org, bucket = args.influxdb_url, args.influxdb_token, args.influxdb_org, args.influxdb_bucket
-    logging.info(f"Got InfluxDB parameters url={url}, token=*****, org={org}, bucket={bucket}")
-    return url, token, org, bucket
+            # TODO: replace missing_arg with RuntimeError
+            missing_arg = arg
+            influx2_arg = arg
+            # raise RuntimeError(
+            #     "Parameter missing: add --{} or {} environment variable".format(arg.lower().replace("_", "-"), arg)
+            # )
+            break
+
+    if missing_arg is None:
+        host, token, org, bucket = args.influx_host, args.influx_token, args.influx_org, args.influx_bucket
+    else:
+        for arg in ["INFLUXDB_URL", "INFLUXDB_TOKEN", "INFLUXDB_ORG", "INFLUXDB_BUCKET"]:
+            if args_dict[arg.lower()] is None:
+                missing_arg = arg
+        host, token, org, bucket = args.influxdb_url, args.influxdb_token, args.influxdb_org, args.influxdb_bucket
+    if missing_arg:
+        raise RuntimeError(
+            "Parameter missing: add --{} or {} environment variable".format(influx2_arg.lower().replace("_", "-"), influx2_arg)
+        )
+    logging.info(f"Got InfluxDB parameters host={host}, token=*****, org={org}, bucket={bucket}")
+    return host, token, org, bucket
 
 
 def create_influxdb_client(url: str, token: str, org: str) -> InfluxDBClient:
