@@ -7,6 +7,7 @@ import datetime
 import struct
 from typing import Optional
 from zoneinfo import ZoneInfo
+from ..utils.lorawan.thingpark import get_uplink_obj
 
 SENSORNODE_CSV = """ID;Table;Name;Size;Units
 1;;System Firmware version (reset message);4;Struct
@@ -36,8 +37,8 @@ def parse_sensornode_table() -> dict:
     lines = SENSORNODE_CSV.splitlines()
     lines.pop(0)
     sensornode_map = {}
-    for l in lines:
-        c = l.split(";")
+    for line in lines:
+        c = line.split(";")
         if len(c) == 5:
             sensornode_map[int(c[0])] = {"table": c[1], "name": c[2], "size": int(c[3]), "type": c[4].split(" ")[0]}
     return sensornode_map
@@ -70,7 +71,7 @@ def parse_sensornode(hex_str: str, port: int) -> dict:
         if _id in [10] and x[0] != 255:  # GPS data with fix
 
             def convert_deg(b):
-                return int.from_bytes(b, byteorder="little", signed=True) / 10 ** 7 * 256.0
+                return int.from_bytes(b, byteorder="little", signed=True) / 10**7 * 256.0
 
             data["lat"], data["lon"] = convert_deg(x[0:3]), convert_deg(x[3:6])
         elif _id in [20, 21, 22, 23]:  # mV
@@ -93,6 +94,18 @@ def decode_hex(hex_str: str, port: int) -> dict:
     Return a dict containing sensor data.
     """
     return parse_sensornode(hex_str, port)
+
+
+def create_datalines_from_raw_unpacked_data(unpacked_data: dict) -> list:
+    """
+    parse raw data from unpacked_data
+    Return well-known parsed data formatted list of data and packet timestamp
+    """
+    uplink_obj = get_uplink_obj(unpacked_data)
+    datalines = create_datalines(uplink_obj.payload_hex, port=uplink_obj.FPort, time_str=uplink_obj.Time)
+    packet_timestamp = datetime.datetime.strptime(uplink_obj.Time, "%Y-%m-%dT%H:%M:%S.%f%z")
+
+    return packet_timestamp, datalines
 
 
 def create_datalines(hex_str: str, port: int, time_str: Optional[str] = None) -> list:
