@@ -118,24 +118,45 @@ async def get_aiokafka_consumer(
     )
     ssl_cafile = ssl_cafile or certifi.where()
     ssl_context = create_ssl_context(cafile=ssl_cafile, certfile=ssl_certfile, keyfile=ssl_keyfile)
-    kc = AIOKafkaConsumer(
-        *topics,
-        bootstrap_servers=bootstrap_servers,
-        security_protocol=security_protocol,
-        ssl_context=ssl_context,
-        sasl_mechanism=sasl_mechanism,
-        sasl_plain_username=sasl_plain_username,
-        sasl_plain_password=sasl_plain_password,
-        group_id=group_id,
-        auto_offset_reset=auto_offset_reset,
-        enable_auto_commit=enable_auto_commit,
-        loop=asyncio.get_event_loop(),
-        **kwargs,
-    )
-    await kc.start()
-    for topic in topics:
-        await seek_to_offset(kc, topic, offset)
-    return kc
+
+    if offset != 0:
+        logging.info(f"Creating AIOKafkaConsumer with group_id '{group_id}' and seeking to offset {offset}")
+        kc = AIOKafkaConsumer(
+            *topics,
+            bootstrap_servers=bootstrap_servers,
+            security_protocol=security_protocol,
+            ssl_context=ssl_context,
+            sasl_mechanism=sasl_mechanism,
+            sasl_plain_username=sasl_plain_username,
+            sasl_plain_password=sasl_plain_password,
+            group_id=group_id,
+            auto_offset_reset=auto_offset_reset,
+            enable_auto_commit=enable_auto_commit,
+            loop=asyncio.get_event_loop(),
+            **kwargs,
+        )
+        await kc.start()
+        for topic in topics:
+            await seek_to_offset(kc, topic, offset)
+        return kc
+    else:
+        logging.info(f"Creating AIOKafkaConsumer with group_id '{group_id}' and not seeking")
+        kc = AIOKafkaConsumer(
+            *topics,
+            bootstrap_servers=bootstrap_servers,
+            security_protocol=security_protocol,
+            ssl_context=ssl_context,
+            sasl_mechanism=sasl_mechanism,
+            sasl_plain_username=sasl_plain_username,
+            sasl_plain_password=sasl_plain_password,
+            group_id=group_id,
+            auto_offset_reset=auto_offset_reset,
+            enable_auto_commit=enable_auto_commit,
+            loop=asyncio.get_event_loop(),
+            **kwargs,
+        )
+        await kc.start()
+        return kc
 
 
 async def get_aiokafka_consumer_by_envs(
@@ -181,7 +202,8 @@ async def seek_to_offset(consumer: AIOKafkaConsumer, topic: str, start: int = -1
     # Loop through partitions and find the latest offset
     for p in consumer.partitions_for_topic(topic):
         tp = TopicPartition(topic, p)
-        committed = await consumer.committed(tp)
+        await consumer.committed(tp)
+        # committed = await consumer.committed(tp)
         await consumer.seek_to_end(tp)
         last_offset = await consumer.position(tp)
         # print("topic: {} partition: {} committed: {} last: {}".format(topic, p, committed, last_offset))
