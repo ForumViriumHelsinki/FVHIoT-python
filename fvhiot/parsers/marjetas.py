@@ -20,6 +20,7 @@ ffff-> byte order little-endian-> ffff (hex) =-1 (decimal from signed 2' s compl
 import datetime
 from typing import Optional
 from zoneinfo import ZoneInfo
+from ..utils.lorawan.thingpark import get_uplink_obj
 
 
 def parse_marjetas(hex_str: str, port: int) -> dict:
@@ -30,7 +31,7 @@ def parse_marjetas(hex_str: str, port: int) -> dict:
     data = {}
     n = 4
     temp_nro = 0
-    for h4 in [hex_str[i: i + n] for i in range(0, len(hex_str), n)]:
+    for h4 in [hex_str[i : i + n] for i in range(0, len(hex_str), n)]:
         i = int(h4[2:4] + h4[0:2], 16)
         if i > int("7fff", 16):
             i = i - (int("ffff", 16) + 1)
@@ -46,6 +47,18 @@ def decode_hex(hex_str: str, port: int) -> dict:
     Return a dict containing sensor data.
     """
     return parse_marjetas(hex_str, port)
+
+
+def create_datalines_from_raw_unpacked_data(unpacked_data: dict) -> list:
+    """
+    parse raw data from unpacked_data
+    Return well-known parsed data formatted list of data and packet timestamp
+    """
+    uplink_obj = get_uplink_obj(unpacked_data)
+    datalines = create_datalines(uplink_obj.payload_hex, port=uplink_obj.FPort, time_str=uplink_obj.Time)
+    packet_timestamp = datetime.datetime.strptime(uplink_obj.Time, "%Y-%m-%dT%H:%M:%S.%f%z")
+
+    return packet_timestamp, datalines
 
 
 def create_datalines(hex_str: str, port: int, time_str: Optional[str] = None) -> list:
