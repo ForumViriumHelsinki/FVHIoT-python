@@ -8,6 +8,7 @@ import re
 import struct
 from typing import Optional
 from zoneinfo import ZoneInfo
+from ..utils.lorawan.thingpark import get_uplink_obj
 
 PROTOCOL_VERSION = 2
 
@@ -50,7 +51,7 @@ def decode(msg, hex_=False):
     bin_flags = bin(struct.unpack(">H", bytes_[3:5])[0])
     flags = bin_flags[2:].zfill(struct.calcsize(">H") * 8)[::-1]
 
-    words = [struct.unpack(">H", bytes_[i: i + 2])[0] for i in range(5, len(bytes_), 2)]
+    words = [struct.unpack(">H", bytes_[i : i + 2])[0] for i in range(5, len(bytes_), 2)]
 
     cur = 0
     result = {"Device ID": devid, "Protocol version": version}
@@ -58,7 +59,7 @@ def decode(msg, hex_=False):
         if flag != "1":
             continue
 
-        x = words[cur: cur + sensor["length"]]
+        x = words[cur : cur + sensor["length"]]
         cur += sensor["length"]
         for value in sensor["values"]:
             if "convert" not in value:
@@ -91,6 +92,18 @@ def parse_decentlab_pm(hex_str: str, port: int) -> dict:
 def decode_hex(hex_str: str, port: int) -> dict:
     """Backwards compatibility function."""
     return parse_decentlab_pm(hex_str, port)
+
+
+def create_datalines_from_raw_unpacked_data(unpacked_data: dict) -> list:
+    """
+    parse raw data from unpacked_data
+    Return well-known parsed data formatted list of data and packet timestamp
+    """
+    uplink_obj = get_uplink_obj(unpacked_data)
+    datalines = create_datalines(uplink_obj.payload_hex, port=uplink_obj.FPort, time_str=uplink_obj.Time)
+    packet_timestamp = datetime.datetime.strptime(uplink_obj.Time, "%Y-%m-%dT%H:%M:%S.%f%z")
+
+    return packet_timestamp, datalines
 
 
 def create_datalines(hex_str: str, port: int, time_str: Optional[str] = None) -> list:

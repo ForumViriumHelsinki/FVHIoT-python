@@ -18,7 +18,7 @@ ignore = []
 [project]
 name = "FVHIoT"
 description = "Utilities for FVH's IoT projects"
-version = "0.3.0"
+version = "0.3.3"
 authors = [
     { name = "Aapo Rista", email = "aapo.rista@forumvirium.fi" }
 ]

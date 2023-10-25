@@ -5,6 +5,7 @@ import struct
 import binascii
 from typing import Optional
 from zoneinfo import ZoneInfo
+from ..utils.lorawan.thingpark import get_uplink_obj
 
 PROTOCOL_VERSION = 2
 
@@ -51,6 +52,18 @@ def parse_dlmbx(hex_str: str, port: int):
 
 def decode_hex(hex_str: str, port: int):
     return parse_dlmbx(hex_str, port)
+
+
+def create_datalines_from_raw_unpacked_data(unpacked_data: dict) -> list:
+    """
+    parse raw data from unpacked_data
+    Return well-known parsed data formatted list of data and packet timestamp
+    """
+    uplink_obj = get_uplink_obj(unpacked_data)
+    datalines = create_datalines(uplink_obj.payload_hex, port=uplink_obj.FPort, time_str=uplink_obj.Time)
+    packet_timestamp = datetime.datetime.strptime(uplink_obj.Time, "%Y-%m-%dT%H:%M:%S.%f%z")
+
+    return packet_timestamp, datalines
 
 
 def create_datalines(hex_str: str, port: int, time_str: Optional[str] = None) -> list:
