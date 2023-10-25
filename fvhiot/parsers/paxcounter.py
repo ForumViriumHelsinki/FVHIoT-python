@@ -15,7 +15,7 @@ https://github.com/cyberman54/ESP32-Paxcounter/blob/master/src/TTN/plain_decoder
 def parse_paxcounter(payload_hex: str, port: int) -> dict:
     """
     Extract wifi and ble counts from `payload_hex` and return them in a dict.
-    Currently, only payloads sent to FPort 1 are parsed.
+    Currently, only payloads sent to FPort 1 are parsed and FPort 9 are ignored.
     Raise ValueError, if different port is used or payload size differs from 4 or 8.
     """
     data = {}
@@ -30,6 +30,8 @@ def parse_paxcounter(payload_hex: str, port: int) -> dict:
             data["ble"] = int(payload_hex[4:8], 16)
         else:
             raise ValueError(f"Payload with size {payload_len} is not currently supported.")
+    if int(port) == 9:
+        return data
     else:
         raise ValueError(f"Port '{port}' is not currently supported.")
     # TODO: Other ports and payload formats are not implemented yet
@@ -88,6 +90,7 @@ if __name__ == "__main__":
         ("0003", 1),
         ("fa117415aaaa", 1),
         ("0d00", 2),
+        ("ff", 9),
         ("0d0016090028b30b143414", 21),
     ]
     main(examples)
