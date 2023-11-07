@@ -2,9 +2,9 @@
 Paxcounter parser placeholder
 """
 import datetime
-import logging
-from typing import Optional, Union
+from typing import Optional
 from zoneinfo import ZoneInfo
+from ..utils.lorawan.thingpark import get_uplink_obj
 
 """
 See example here:
@@ -15,7 +15,7 @@ https://github.com/cyberman54/ESP32-Paxcounter/blob/master/src/TTN/plain_decoder
 def parse_paxcounter(payload_hex: str, port: int) -> dict:
     """
     Extract wifi and ble counts from `payload_hex` and return them in a dict.
-    Currently, only payloads sent to FPort 1 are parsed.
+    Currently, only payloads sent to FPort 1 are parsed and FPort 9 are ignored.
     Raise ValueError, if different port is used or payload size differs from 4 or 8.
     """
     data = {}
@@ -30,6 +30,8 @@ def parse_paxcounter(payload_hex: str, port: int) -> dict:
             data["ble"] = int(payload_hex[4:8], 16)
         else:
             raise ValueError(f"Payload with size {payload_len} is not currently supported.")
+    if int(port) == 9:
+        return data
     else:
         raise ValueError(f"Port '{port}' is not currently supported.")
     # TODO: Other ports and payload formats are not implemented yet
@@ -43,6 +45,18 @@ def decode_hex(hex_str: str, port: int) -> dict:
     NOTE: this is here for backwards compatibility.
     """
     return parse_paxcounter(hex_str, port)
+
+
+def create_datalines_from_raw_unpacked_data(unpacked_data: dict) -> list:
+    """
+    parse raw data from unpacked_data
+    Return well-known parsed data formatted list of data and packet timestamp
+    """
+    uplink_obj = get_uplink_obj(unpacked_data)
+    datalines = create_datalines(uplink_obj.payload_hex, port=uplink_obj.FPort, time_str=uplink_obj.Time)
+    packet_timestamp = datetime.datetime.strptime(uplink_obj.Time, "%Y-%m-%dT%H:%M:%S.%f%z")
+
+    return packet_timestamp, datalines
 
 
 def create_datalines(hex_str: str, port: int, time_str: Optional[str] = None) -> list:
@@ -88,6 +102,7 @@ if __name__ == "__main__":
         ("0003", 1),
         ("fa117415aaaa", 1),
         ("0d00", 2),
+        ("ff", 9),
         ("0d0016090028b30b143414", 21),
     ]
     main(examples)
