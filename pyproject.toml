@@ -18,14 +18,19 @@ ignore = []
 [project]
 name = "FVHIoT"
 description = "Utilities for FVH's IoT projects"
-version = "0.3.3"
+readme = "README.md"
+requires-python = ">=3.9"
+version = "0.4.0"
 authors = [
-    { name = "Aapo Rista", email = "aapo.rista@forumvirium.fi" }
+    { name = "Aapo Rista", email = "aapo.rista@forumvirium.fi" },
+    { name = "Aapo Rista", email = "aapris@gmail.com" }
 ]
-dependencies = [
-    'Flask',
-    'starlette',
-    'certifi',
-    'aiokafka',
-    'msgpack',
-]
+
+# See setup.cfg for dependencies
+#dependencies = [
+#    'aiokafka',
+#    'certifi',
+#    'Flask',
+#    'msgpack',
+#    'starlette',
+#]
