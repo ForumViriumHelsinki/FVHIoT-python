@@ -2,7 +2,7 @@
 OCPP standard models for EKO EV charging.
 """
 from enum import Enum
-from typing import Any, List, Dict, Optional, Union
+from typing import Any, Union
 
 from pydantic import BaseModel, Field
 
