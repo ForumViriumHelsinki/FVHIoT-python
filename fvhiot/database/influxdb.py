@@ -58,7 +58,9 @@ def get_influxdb_args() -> Tuple[str, str, str, str]:
         host, token, org, bucket = args.influxdb_url, args.influxdb_token, args.influxdb_org, args.influxdb_bucket
     if missing_arg:
         raise RuntimeError(
-            "Parameter missing: add --{} or {} environment variable".format(influx2_arg.lower().replace("_", "-"), influx2_arg)
+            "Parameter missing: add --{} or {} environment variable".format(
+                influx2_arg.lower().replace("_", "-"), influx2_arg
+            )
         )
     logging.info(f"Got InfluxDB parameters host={host}, token=*****, org={org}, bucket={bucket}")
     return host, token, org, bucket

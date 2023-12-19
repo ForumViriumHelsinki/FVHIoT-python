@@ -6,6 +6,7 @@ class Meta(BaseModel, extra=Extra.allow):
     """
     Check that device_id is present. All other metadata fields are optional.
     """
+
     device_id: str
 
 
@@ -13,6 +14,7 @@ class MongoDataline(BaseModel, extra=Extra.allow):
     """
     Check that data contains meta and a valid timezone aware datetime in time field
     """
+
     meta: Meta
     time: datetime.datetime
 

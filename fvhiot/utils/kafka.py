@@ -10,15 +10,16 @@ from kafka.errors import NoBrokersAvailable
 
 # New try 03/2022 here:
 
+
 def get_kafka_producer(
-        bootstrap_servers: list[str] = None,
-        security_protocol: str = None,
-        ssl_cafile: str = None,
-        ssl_certfile: str = None,
-        ssl_keyfile: str = None,
-        sasl_mechanism: str = None,
-        sasl_plain_username: str = None,
-        sasl_plain_password: str = None,
+    bootstrap_servers: list[str] = None,
+    security_protocol: str = None,
+    ssl_cafile: str = None,
+    ssl_certfile: str = None,
+    ssl_keyfile: str = None,
+    sasl_mechanism: str = None,
+    sasl_plain_username: str = None,
+    sasl_plain_password: str = None,
 ) -> KafkaProducer:
     """
     Simply create and return a KafkaProducer using given arguments.
@@ -65,18 +66,18 @@ def get_kafka_producer_by_envs():
 
 
 def get_kafka_consumer(
-        topic: str | list[str],
-        bootstrap_servers: list[str] = None,
-        security_protocol: str = None,
-        ssl_cafile: str = None,
-        ssl_certfile: str = None,
-        ssl_keyfile: str = None,
-        sasl_mechanism: str = None,
-        sasl_plain_username: str = None,
-        sasl_plain_password: str = None,
-        group_id: str = None,
-        enable_auto_commit: bool = False,
-        offset: int = 0
+    topic: str | list[str],
+    bootstrap_servers: list[str] = None,
+    security_protocol: str = None,
+    ssl_cafile: str = None,
+    ssl_certfile: str = None,
+    ssl_keyfile: str = None,
+    sasl_mechanism: str = None,
+    sasl_plain_username: str = None,
+    sasl_plain_password: str = None,
+    group_id: str = None,
+    enable_auto_commit: bool = False,
+    offset: int = 0,
 ):
     """
     Simply create and return a KafkaConsumer using given arguments.
@@ -162,7 +163,7 @@ def seek_to_offset(consumer: KafkaConsumer, topic: str, start: int = 0):
     for p in consumer.partitions_for_topic(topic):
         tp = TopicPartition(topic, p)
         consumer.assign([tp])
-        committed = consumer.committed(tp)
+        # committed = consumer.committed(tp)
         consumer.seek_to_end(tp)
         last_offset = consumer.position(tp)
         # print("topic: {} partition: {} committed: {} last: {}".format(topic, p, committed, last_offset))
@@ -177,13 +178,13 @@ def seek_to_offset(consumer: KafkaConsumer, topic: str, start: int = 0):
 
 
 def get_producer(
-        bootstrap_servers,
-        security_protocol,
-        sasl_mechanism,
-        sasl_plain_username,
-        sasl_plain_password,
-        ssl_certfile=None,
-        ssl_keyfile=None,
+    bootstrap_servers,
+    security_protocol,
+    sasl_mechanism,
+    sasl_plain_username,
+    sasl_plain_password,
+    ssl_certfile=None,
+    ssl_keyfile=None,
 ):
     return KafkaProducer(
         bootstrap_servers=bootstrap_servers,
@@ -199,14 +200,14 @@ def get_producer(
 
 
 def get_consumer(
-        topic,
-        bootstrap_servers,
-        security_protocol,
-        sasl_mechanism,
-        sasl_plain_username,
-        sasl_plain_password,
-        ssl_certfile=None,
-        ssl_keyfile=None,
+    topic,
+    bootstrap_servers,
+    security_protocol,
+    sasl_mechanism,
+    sasl_plain_username,
+    sasl_plain_password,
+    ssl_certfile=None,
+    ssl_keyfile=None,
 ):
     return KafkaConsumer(
         topic,

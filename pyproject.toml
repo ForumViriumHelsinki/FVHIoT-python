@@ -20,17 +20,27 @@ name = "FVHIoT"
 description = "Utilities for FVH's IoT projects"
 readme = "README.md"
 requires-python = ">=3.9"
-version = "0.4.0"
+license = { file = "LICENSE" }
 authors = [
     { name = "Aapo Rista", email = "aapo.rista@forumvirium.fi" },
     { name = "Aapo Rista", email = "aapris@gmail.com" }
 ]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+version = "0.4.1"
 
-# See setup.cfg for dependencies
-#dependencies = [
-#    'aiokafka',
-#    'certifi',
-#    'Flask',
-#    'msgpack',
-#    'starlette',
-#]
+[project.optional-dependencies]
+test = ["pytest"]
+dev = ["ruff", "black", "pre-commit"]
+flask = ["Flask"]
+kafka = ["aiokafka", "msgpack", "certifi"]
+starlette = ["starlette"]
+
+[project.urls]
+Repository = "https://github.com/ForumVirium/FVHIoT-Python"

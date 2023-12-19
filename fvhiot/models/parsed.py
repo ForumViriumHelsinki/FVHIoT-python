@@ -1,9 +1,9 @@
 """
-Pydantic models for parsed data. 
+Pydantic models for parsed data.
 
 Note that data may contain either 'time' field or 'start_time' and 'end_time' fields,
 in addition to 'f'. The time fields should be mutually exclusive, i.e., the message
-should contain only either 'time' field alone, or both, 'start_time' and 'end_time' 
+should contain only either 'time' field alone, or both, 'start_time' and 'end_time'
 fields, without 'time' being present. Currently this is handled via Union, which selects
 the first Model that is present in the data or gives an error, if neither is.
 
@@ -39,9 +39,9 @@ Sample data:
     "data": [
         {
             "time": "2018-08-16T02:00:39.000Z",
-            "f": { 
+            "f": {
                "0": {"v": 3.0},
-               "1": {"v": 30.0} 
+               "1": {"v": 30.0}
              }
         },
         ...

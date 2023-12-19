@@ -1,7 +1,7 @@
 # FVHIoT Python
 
 Forum Virium Helsinki's experimental Python utils
-to manage IoT related messaging.  
+to manage IoT related messaging.
 
 # Installation
 
@@ -11,7 +11,7 @@ Add fvhiot to your dependencies in `pyproject.toml`.
 
 Don't forget to add necessary extras and correct tag.
 E.g. FastAPI based endpoint service needs `starlette` and `kafka` extras.
-See [setup.cfg](setup.cfg) for all extras.
+See [pyproject.toml](pyproject.toml) for all extras.
 
 Examples (add just one line):
 

@@ -20,9 +20,8 @@ class RequestModel(BaseModel):
         extra = "allow"
 """
 
-from typing import Any, Dict
 
-from pydantic import model_validator, BaseModel, StrictStr, StrictBytes
+from pydantic import BaseModel, StrictStr, StrictBytes
 
 
 class RequestData(BaseModel):

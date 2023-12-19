@@ -2,16 +2,16 @@
 
 This module contains parsers, which usually take in some
 hex string and return the parsed data in an object in
-"well-known-parsed-data-format". 
+"well-known-parsed-data-format".
 
 All modules must implement `create_datalines()` function
 and it must return a list of objects having
 ("time" | ("starttime" & "endtime") & "data") keys
 
-See parsers source code to see how they are implemented and 
-run them (with or without input) to see what they return.  
+See parsers source code to see how they are implemented and
+run them (with or without input) to see what they return.
 
-E.g. calling 
+E.g. calling
 
 `sensornode.create_datalines("01e32337f80e14941228ba01295701", 10)`
 
