@@ -17,7 +17,7 @@ Examples (add just one line):
 
 ```toml
 dependencies = [
-  "fvhiot@https://github.com/ForumViriumHelsinki/FVHIoT-python/archive/refs/tags/v0.4.0.zip",
-  "fvhiot[kafka,starlette] @ https://github.com/ForumViriumHelsinki/FVHIoT-python/archive/refs/tags/v0.4.0.zip",
+  "fvhiot@https://github.com/ForumViriumHelsinki/FVHIoT-python/archive/refs/tags/v0.4.1.zip",
+  "fvhiot[kafka,starlette] @ https://github.com/ForumViriumHelsinki/FVHIoT-python/archive/refs/tags/v0.4.1.zip",
 ]
 ```
