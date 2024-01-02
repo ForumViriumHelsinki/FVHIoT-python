@@ -53,12 +53,12 @@ from typing import Any, Dict, List, Union, Tuple, Optional
 
 from fvhiot.models.device import Device
 
-from pydantic import BaseModel, validator, Extra
+from pydantic import field_validator, BaseModel, Extra
 
 
 class Column(BaseModel, extra=Extra.forbid):
     name: str
-    unit: Optional[str]
+    unit: Optional[str] = None
 
 
 class Header(BaseModel, extra=Extra.forbid):
@@ -89,7 +89,8 @@ class ParsedData(BaseModel, extra=Extra.forbid):
     header: Header
     data: List[Union[DataPointTime, DataPointStartEndTime]]
 
-    @validator("data", pre=True)
+    @field_validator("data", mode="before")
+    @classmethod
     def check_time_fields(cls, list_vals: List[dict]) -> List[dict]:
         allowed_sets = {frozenset(["time"]), frozenset(["start_time", "end_time"])}
         found_set = set()

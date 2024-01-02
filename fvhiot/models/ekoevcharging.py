@@ -4,7 +4,7 @@ OCPP standard models for EKO EV charging.
 from enum import Enum
 from typing import Any, Union
 
-from pydantic import BaseModel, Field
+from pydantic import ConfigDict, BaseModel, Field
 
 
 class ContextEnum(str, Enum):
@@ -147,9 +147,7 @@ class StatusNotification(BaseModel):
     timestamp: str = Field(alias="packet_timestamp")  # "2021-08-16T19:21:04Z"
     vendorId: str
     vendorErrorCode: str
-
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class OCPP(BaseModel):
@@ -166,6 +164,4 @@ class OCPP(BaseModel):
     ocppStandard: str
     centralSystemResponse: Any = None
     createdAt: str = Field(alias="packet_timestamp")  # "2021-08-16T19:21:04Z"
-
-    class Config:
-        allow_population_by_field_name = True
+    model_config = ConfigDict(populate_by_name=True)
