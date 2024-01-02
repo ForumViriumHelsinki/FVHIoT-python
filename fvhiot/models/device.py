@@ -30,11 +30,11 @@ class Device(BaseModel):
 
 
 class PatchDeviceState(BaseModel):
-    created_at: Optional[datetime.datetime]
-    updated_at: Optional[datetime.datetime]
-    last_seen_at: Optional[datetime.datetime]
-    state: Optional[str]
-    location: Optional[str]
+    created_at: Optional[datetime.datetime] = None
+    updated_at: Optional[datetime.datetime] = None
+    last_seen_at: Optional[datetime.datetime] = None
+    state: Optional[str] = None
+    location: Optional[str] = None
 
 
 class PatchDeviceMetadata(BaseModel):
@@ -42,13 +42,13 @@ class PatchDeviceMetadata(BaseModel):
     Helper class for patching devices.
     """
 
-    device_type: Optional[str]
-    parser_module: Optional[str]
-    name: Optional[str]
-    pseudonym: Optional[str]
-    description: Optional[str]
-    state: Optional[str]
-    device_in_redis: Optional[str]
+    device_type: Optional[str] = None
+    parser_module: Optional[str] = None
+    name: Optional[str] = None
+    pseudonym: Optional[str] = None
+    description: Optional[str] = None
+    state: Optional[str] = None
+    device_in_redis: Optional[str] = None
 
 
 class PatchDevice(BaseModel):

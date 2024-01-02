@@ -1,6 +1,6 @@
 from typing import List, Dict, Optional
 
-from pydantic import BaseModel
+from pydantic import RootModel, BaseModel
 
 
 class Lrr(BaseModel):
@@ -11,8 +11,8 @@ class Lrr(BaseModel):
     LrrESP: float  # -96.212387
 
 
-class Lrrs(BaseModel):
-    __root__: Dict[str, List[Lrr]]
+class Lrrs(RootModel[Dict[str, List[Lrr]]]):
+    pass
 
 
 class Alr(BaseModel):

@@ -1,5 +1,5 @@
 import datetime
-from pydantic import BaseModel, Extra, validator
+from pydantic import field_validator, BaseModel, Extra
 
 
 class Meta(BaseModel, extra=Extra.allow):
@@ -18,7 +18,8 @@ class MongoDataline(BaseModel, extra=Extra.allow):
     meta: Meta
     time: datetime.datetime
 
-    @validator("time")
+    @field_validator("time")
+    @classmethod
     def time_must_be_aware(cls, v):
         if v.tzinfo is None or v.tzinfo.utcoffset(v) is None:
             raise ValueError("Datetime must be timezone aware, got naive datetime.")
