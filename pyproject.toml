@@ -1,9 +1,11 @@
 [build-system]
 requires = [
-    "setuptools>=42",
-    "wheel"
+    "setuptools>=60",
+    "setuptools-scm>=8.0"
 ]
 build-backend = "setuptools.build_meta"
+
+[tool.setuptools_scm]
 
 [tool.ruff]
 line-length = 120
@@ -19,7 +21,7 @@ authors = [
     { name = "Aapo Rista", email = "aapo.rista@forumvirium.fi" },
     { name = "Aapo Rista", email = "aapris@gmail.com" }
 ]
-version = "1.0.0"
+dynamic = ["version"]
 
 [project.optional-dependencies]
 test = ["pytest"]
