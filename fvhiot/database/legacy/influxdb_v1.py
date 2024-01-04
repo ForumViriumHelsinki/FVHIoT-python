@@ -79,7 +79,7 @@ def test_query_v1(client: InfluxDBClient_v1):
 
 
 def main():
-    logging.basicConfig(format="%(asctime)s %(levelname)-8s %(message)s", level=getattr(logging, "DEBUG"))
+    logging.basicConfig(format="%(asctime)s %(levelname)-8s %(message)s", level=logging.DEBUG)
     host, port, database, username, password, ssl, verify_ssl = get_influxdb_args_v1()
     c = create_influxdb_client_v1(host, port, database, username, password, ssl, verify_ssl)
     test_query_v1(c)
