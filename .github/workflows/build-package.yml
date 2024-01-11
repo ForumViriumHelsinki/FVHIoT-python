@@ -1,0 +1,32 @@
+# Publish release when a commit is tagged with a version
+
+name: Publish release
+
+on:
+  push:
+    tags:
+    - 'v*.*.*'
+  # Allow manual triggering
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+      - name: Build package
+        run: python -m build
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./dist/FVHIoT-*.tar.gz
+            ./dist/FVHIoT-*-py3-none-any.whl
