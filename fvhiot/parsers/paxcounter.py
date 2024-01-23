@@ -1,9 +1,10 @@
 """
-Paxcounter parser placeholder
+Paxcounter parser
 """
 import datetime
 from typing import Optional
 from zoneinfo import ZoneInfo
+
 from ..utils.lorawan.thingpark import get_uplink_obj
 
 """
@@ -30,7 +31,7 @@ def parse_paxcounter(payload_hex: str, port: int) -> dict:
             data["ble"] = int(payload_hex[4:8], 16)
         else:
             raise ValueError(f"Payload with size {payload_len} is not currently supported.")
-    if int(port) == 9:
+    elif int(port) == 9:
         return data
     else:
         raise ValueError(f"Port '{port}' is not currently supported.")
@@ -87,9 +88,9 @@ def main(samples: list):
         print("Some examples:")
         for s in samples:
             try:
-                print(json.dumps(create_datalines(s[0], s[1], now), indent=2))
+                print("{}:{} --> {}".format(s[0], s[1], json.dumps(create_datalines(s[0], s[1], now), indent=2)))
             except ValueError as err:
-                print(f"Invalid FPort '{s[1]}' or payload size {len(s[0])}: {err}")
+                print(f"Invalid payload + FPort '{s[0]}:{s[1]}' or payload size {len(s[0])}: {err}")
         print(f"\nUsage: {sys.argv[0]} hex_payload port\n\n")
 
 
@@ -100,9 +101,9 @@ if __name__ == "__main__":
     examples = [
         ("00020001", 1),
         ("0003", 1),
-        ("fa117415aaaa", 1),
-        ("0d00", 2),
-        ("ff", 9),
-        ("0d0016090028b30b143414", 21),
+        ("fa117415aaaa", 1),  # Fails
+        ("0d00", 2),  # Fails
+        ("ff", 9),  # Ignored
+        ("0d0016090028b30b143414", 21),  # Fails
     ]
     main(examples)
