@@ -1,7 +1,10 @@
 """
 Parser for Milesight-EM300-TH data format
 https://github.com/Milesight-IoT/SensorDecoders/blob/main/EM_Series/EM300_Series/EM300-TH/EM300-TH_Decoder.js
+Parser for Milesight-EM310-UDL data format
+https://github.com/Milesight-IoT/SensorDecoders/blob/main/EM_Series/EM300_Series/EM310-UDL/EM310-UDL_Decoder.js
 """
+
 import datetime
 import struct
 from typing import Optional
@@ -34,21 +37,29 @@ def parse_milesight(hex_str: str, port: int) -> dict:
         channel_id = byte_data[i]
         channel_type = byte_data[i + 1]
         i += 2
-
         if channel_id == 0x01 and channel_type == 0x75:
             data["battery"] = byte_data[i]
             i += 1
+        # EM300-TH temperature and humidity sensor
         elif channel_id == 0x03 and channel_type == 0x67:
             data["temperature"] = read_int16_le(byte_data[i: i + 2]) / 10.0
             i += 2
         elif channel_id == 0x04 and channel_type == 0x68:
             data["humidity"] = byte_data[i] / 2.0
             i += 1
+        # EM310-UDL ultrasonic distance sensor
+        elif channel_id == 0x03 and channel_type == 0x82:
+            data['distance'] = read_uint16_le(byte_data[i:i + 2])
+            i += 2
+        elif channel_id == 0x04 and channel_type == 0x00:
+            data['position'] = 0 if byte_data[i] == 0 else 1
+            i += 1
         elif channel_id == 0x20 and channel_type == 0xCE:
-            point = {}
-            point["timestamp"] = read_uint32_le(byte_data[i: i + 4])
-            point["temperature"] = read_int16_le(byte_data[i + 4: i + 6]) / 10.0
-            point["humidity"] = byte_data[i + 6] / 2.0
+            point = {
+                "timestamp": read_uint32_le(byte_data[i: i + 4]),
+                "temperature": read_int16_le(byte_data[i + 4: i + 6]) / 10.0,
+                "humidity": byte_data[i + 6] / 2.0
+            }
             if "history" not in data:
                 data["history"] = []
             data["history"].append(point)
@@ -110,5 +121,6 @@ if __name__ == "__main__":
         ["0367ed0004684b", 85],
         ["0367f100046847", 85],
         ["0175640367f500046866", 85],
+        ["01755C03824408040000", 85],  # "battery": 92, "distance": 2116, "position": 0
     ]
     main(examples)
