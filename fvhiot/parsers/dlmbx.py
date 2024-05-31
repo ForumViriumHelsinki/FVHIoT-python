@@ -5,7 +5,7 @@ import struct
 import binascii
 from typing import Optional
 from zoneinfo import ZoneInfo
-from ..utils.lorawan.thingpark import get_uplink_obj
+# from ..utils.lorawan.thingpark import get_uplink_obj
 
 PROTOCOL_VERSION = 2
 
@@ -97,9 +97,9 @@ def main(samples: list):
         print("Some examples:")
         for s in samples:
             try:
-                print(json.dumps(create_datalines(s[0], s[1], now), indent=2))
+                print("{}:{} --> {}".format(s[0], s[1], json.dumps(create_datalines(s[0], s[1], now), indent=2)))
             except ValueError as err:
-                print(f"Invalid FPort '{s[1]}' or payload size {len(s[0])}: {err}")
+                print(f"Invalid payload + FPort '{s[0]}:{s[1]}' or payload size {len(s[0])}: {err}")
         print(f"\nUsage: {sys.argv[0]} hex_payload port\n\n")
 
 
