@@ -54,6 +54,21 @@ def parse_milesight(hex_str: str, port: int) -> dict:
         elif channel_id == 0x04 and channel_type == 0x00:
             data['position'] = 0 if byte_data[i] == 0 else 1
             i += 1
+        # EM400-TLD
+        elif channel_id == 0x04 and channel_type == 0x82:
+            data['distance'] = read_uint16_le(byte_data[i:i + 2])
+            i += 2
+        elif channel_id == 0x05 and channel_type == 0x00:
+            data['position'] = 0 if byte_data[i] == 0 else 1
+            i += 1
+        elif channel_id == 0x83 and channel_type == 0x67:
+            data["temperature"] = read_int16_le(byte_data[i: i + 2]) / 10.0
+            data["temperature_abnormal"] = byte_data[i + 2]
+            i += 3
+        elif channel_id == 0x84 and channel_type == 0x82:
+            data['distance'] = read_uint16_le(byte_data[i:i + 2])
+            data['distance_alarming'] = byte_data[i + 2]
+            i += 3
         elif channel_id == 0x20 and channel_type == 0xCE:
             point = {
                 "timestamp": read_uint32_le(byte_data[i: i + 4]),
@@ -121,6 +136,9 @@ if __name__ == "__main__":
         ["0367ed0004684b", 85],
         ["0367f100046847", 85],
         ["0175640367f500046866", 85],
-        ["01755C03824408040000", 85],  # "battery": 92, "distance": 2116, "position": 0
+        ["01755C03824408040000", 85],  # {"battery": 92, "distance": 2116, "position": 0}
+        ["01755C0367010104824408050001", 85],  # {"battery":92,"temperature":25.7,"distance":2116,"position":1}
+        ["8367e800018482410601", 85],
+        # --> {"temperature": 23.2, "temperature_abnormal": 1, "distance": 1601, "distance_alarming": 1}
     ]
     main(examples)
