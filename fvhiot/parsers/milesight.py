@@ -3,6 +3,8 @@ Parser for Milesight-EM300-TH data format
 https://github.com/Milesight-IoT/SensorDecoders/blob/main/EM_Series/EM300_Series/EM300-TH/EM300-TH_Decoder.js
 Parser for Milesight-EM310-UDL data format
 https://github.com/Milesight-IoT/SensorDecoders/blob/main/EM_Series/EM300_Series/EM310-UDL/EM310-UDL_Decoder.js
+Parser for Milesight-EM400-TLD data format
+https://github.com/Milesight-IoT/SensorDecoders/blob/main/EM_Series/EM400_Series/EM400-TLD/EM400-TLD_Decoder.js
 """
 
 import datetime
@@ -42,38 +44,38 @@ def parse_milesight(hex_str: str, port: int) -> dict:
             i += 1
         # EM300-TH temperature and humidity sensor
         elif channel_id == 0x03 and channel_type == 0x67:
-            data["temperature"] = read_int16_le(byte_data[i: i + 2]) / 10.0
+            data["temperature"] = read_int16_le(byte_data[i : i + 2]) / 10.0
             i += 2
         elif channel_id == 0x04 and channel_type == 0x68:
             data["humidity"] = byte_data[i] / 2.0
             i += 1
         # EM310-UDL ultrasonic distance sensor
         elif channel_id == 0x03 and channel_type == 0x82:
-            data['distance'] = read_uint16_le(byte_data[i:i + 2])
+            data["distance"] = read_uint16_le(byte_data[i : i + 2])
             i += 2
         elif channel_id == 0x04 and channel_type == 0x00:
-            data['position'] = 0 if byte_data[i] == 0 else 1
+            data["position"] = 0 if byte_data[i] == 0 else 1
             i += 1
         # EM400-TLD
         elif channel_id == 0x04 and channel_type == 0x82:
-            data['distance'] = read_uint16_le(byte_data[i:i + 2])
+            data["distance"] = read_uint16_le(byte_data[i : i + 2])
             i += 2
         elif channel_id == 0x05 and channel_type == 0x00:
-            data['position'] = 0 if byte_data[i] == 0 else 1
+            data["position"] = 0 if byte_data[i] == 0 else 1
             i += 1
         elif channel_id == 0x83 and channel_type == 0x67:
-            data["temperature"] = read_int16_le(byte_data[i: i + 2]) / 10.0
+            data["temperature"] = read_int16_le(byte_data[i : i + 2]) / 10.0
             data["temperature_abnormal"] = byte_data[i + 2]
             i += 3
         elif channel_id == 0x84 and channel_type == 0x82:
-            data['distance'] = read_uint16_le(byte_data[i:i + 2])
-            data['distance_alarming'] = byte_data[i + 2]
+            data["distance"] = read_uint16_le(byte_data[i : i + 2])
+            data["distance_alarming"] = byte_data[i + 2]
             i += 3
         elif channel_id == 0x20 and channel_type == 0xCE:
             point = {
-                "timestamp": read_uint32_le(byte_data[i: i + 4]),
-                "temperature": read_int16_le(byte_data[i + 4: i + 6]) / 10.0,
-                "humidity": byte_data[i + 6] / 2.0
+                "timestamp": read_uint32_le(byte_data[i : i + 4]),
+                "temperature": read_int16_le(byte_data[i + 4 : i + 6]) / 10.0,
+                "humidity": byte_data[i + 6] / 2.0,
             }
             if "history" not in data:
                 data["history"] = []
@@ -132,13 +134,12 @@ if __name__ == "__main__":
     import sys
 
     examples = [
-        ["0367e70004684d", 85],
-        ["0367ed0004684b", 85],
-        ["0367f100046847", 85],
-        ["0175640367f500046866", 85],
+        ["0367e70004684d", 85],  # { "temperature": 23.1, "humidity": 38.5}
+        ["0367ed0004684b", 85],  # { "temperature": 23.7, "humidity": 37.5}
+        ["0367f100046847", 85],  # { "temperature": 24.1, "humidity": 35.5}
+        ["0175640367f500046866", 85],  #{ "battery": 100, "temperature": 24.5, "humidity": 51.0}
         ["01755C03824408040000", 85],  # {"battery": 92, "distance": 2116, "position": 0}
         ["01755C0367010104824408050001", 85],  # {"battery":92,"temperature":25.7,"distance":2116,"position":1}
-        ["8367e800018482410601", 85],
-        # --> {"temperature": 23.2, "temperature_abnormal": 1, "distance": 1601, "distance_alarming": 1}
+        ["8367e800018482410601", 85],  # {"temperature": 23.2, "temperature_abnormal": 1, "distance": 1601, "distance_alarming": 1}
     ]
     main(examples)
