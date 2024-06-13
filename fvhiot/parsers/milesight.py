@@ -137,9 +137,12 @@ if __name__ == "__main__":
         ["0367e70004684d", 85],  # { "temperature": 23.1, "humidity": 38.5}
         ["0367ed0004684b", 85],  # { "temperature": 23.7, "humidity": 37.5}
         ["0367f100046847", 85],  # { "temperature": 24.1, "humidity": 35.5}
-        ["0175640367f500046866", 85],  #{ "battery": 100, "temperature": 24.5, "humidity": 51.0}
+        ["0175640367f500046866", 85],  # { "battery": 100, "temperature": 24.5, "humidity": 51.0}
         ["01755C03824408040000", 85],  # {"battery": 92, "distance": 2116, "position": 0}
         ["01755C0367010104824408050001", 85],  # {"battery":92,"temperature":25.7,"distance":2116,"position":1}
-        ["8367e800018482410601", 85],  # {"temperature": 23.2, "temperature_abnormal": 1, "distance": 1601, "distance_alarming": 1}
+        [
+            "8367e800018482410601",
+            85,
+        ],  # {"temperature": 23.2, "temperature_abnormal": 1, "distance": 1601, "distance_alarming": 1}
     ]
     main(examples)
