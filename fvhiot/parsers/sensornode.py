@@ -60,9 +60,9 @@ def parse_sensornode(hex_str: str, port: int) -> dict:
         # Remove next chunk from hex payload
         chunk = hex_str[:s]
         hex_str = hex_str[s:]
-        if len(hex_str) == 0:
-            break
         if _id in [1]:  # List contains fields not to parse
+            if len(hex_str) == 0:
+                break
             # Get and remove next id from hex payload
             _id = int(hex_str[:2], 16)
             hex_str = hex_str[2:]
@@ -83,6 +83,9 @@ def parse_sensornode(hex_str: str, port: int) -> dict:
         elif _id in [43]:  # temp & humidity
             data["temprh_temp"] = struct.unpack("<h", x[:2])[0] / 100
             data["temprh_rh"] = x[2] / 2
+        if len(hex_str) == 0:
+            break
+
         _id = int(hex_str[:2], 16)
         hex_str = hex_str[2:]
     return data
@@ -128,6 +131,7 @@ def main(samples: list):
                 print("{}:{} --> {}".format(s[0], s[1], json.dumps(create_datalines(s[0], s[1], now), indent=2)))
             except ValueError as err:
                 print(f"Invalid payload + FPort '{s[0]}:{s[1]}' or payload size {len(s[0])}: {err}")
+                raise
         print(f"\nUsage: {sys.argv[0]} hex_payload port\n\n")
 
 
@@ -141,5 +145,6 @@ if __name__ == "__main__":
         ["ffffffffffff2b840846299108143414", 10],
         ["0d0016090028b30b143414", 21],
         ["041528c22ea00000000000d72bc22ea000000000001a30c22ea0000000000000", 2],
+        ["8c14280b09297808", 20],
     ]
     main(examples)
