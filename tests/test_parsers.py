@@ -80,6 +80,7 @@ class TestSensornode:
         d = sensornode.create_datalines("90e12357f20e0140010205", 10, TS)
         assert 60.1985024 == d[0]["data"]["lat"]
         assert 25.0763008 == d[0]["data"]["lon"]
+        assert 2 == len(d[0]["data"])
         assert TS == d[0]["time"]
 
     def test_lat_lon_batt_temp_in(self):
@@ -88,6 +89,8 @@ class TestSensornode:
         assert 25.1148032 == d[0]["data"]["lon"]
         assert 4.756 == d[0]["data"]["batt"]
         assert 4.42 == d[0]["data"]["temp_in"]
+        assert 3.43 == d[0]["data"]["temp_out1"]
+        assert 5 == len(d[0]["data"])
         assert TS == d[0]["time"]
 
     def test_temprh_temp_rh_temp_out1(self):
@@ -95,6 +98,8 @@ class TestSensornode:
         assert 21.8 == d[0]["data"]["temprh_temp"]
         assert 35.0 == d[0]["data"]["temprh_rh"]
         assert 21.93 == d[0]["data"]["temp_out1"]
+        assert 5.172 == d[0]["data"]["batt"]
+        assert 4 == len(d[0]["data"])
         assert TS == d[0]["time"]
 
     def test_analog1_analog2_temp_in(self):
@@ -102,7 +107,18 @@ class TestSensornode:
         assert 0.013 == d[0]["data"]["analog1"]
         assert 0.009 == d[0]["data"]["analog2"]
         assert 29.95 == d[0]["data"]["temp_in"]
+        assert 5.172 == d[0]["data"]["batt"]
+        assert 4 == len(d[0]["data"])
         assert TS == d[0]["time"]
+
+    def test_batt_temp_in_temp_out1(self):
+        d = sensornode.create_datalines("8c14280b09297808", 20, TS)
+        assert 5.260 == d[0]["data"]["batt"]
+        assert 23.15 == d[0]["data"]["temp_in"]
+        assert 21.68 == d[0]["data"]["temp_out1"]
+        assert 3 == len(d[0]["data"])
+        assert TS == d[0]["time"]
+
 
     def test_empty(self):
         d = sensornode.create_datalines("041528c22ea00000000000d72bc22ea000000000001a30c22ea0000000000000", 2, TS)
