@@ -4,6 +4,7 @@ https://github.com/sompasauna/sompis-metering-firmware
 """
 
 import datetime
+import logging
 from typing import Optional
 from zoneinfo import ZoneInfo
 
@@ -36,6 +37,11 @@ def parse_s_sensecap(payload_hex: str, port: int) -> dict:
             db = bytebuffer[:11]
             bytebuffer = bytebuffer[11:]
             data["battery_percentage"] = db[1]
+        else:
+            logging.warning(
+                f"Unknown telemetry ID {hex(_id)} encountered in payload '{payload_hex}' on port {port}. Stopping further parsing of this payload."
+            )
+            break
     return data
 
 
