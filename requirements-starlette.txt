@@ -4,7 +4,7 @@
 #
 #    pip-compile --extra=starlette --output-file=requirements-starlette.txt --strip-extras
 #
-anyio==4.2.0
+anyio==4.14.0
     # via starlette
 idna==3.7
     # via anyio
