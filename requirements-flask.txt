@@ -6,7 +6,7 @@
 #
 blinker==1.8.2
     # via flask
-click==8.1.7
+click==8.4.1
     # via flask
 flask==3.0.3
     # via FVHIoT (pyproject.toml)
