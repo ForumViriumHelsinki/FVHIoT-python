@@ -4,7 +4,7 @@
 #
 #    pip-compile --extra=dev --output-file=requirements-dev.txt --strip-extras
 #
-cfgv==3.4.0
+cfgv==3.5.0
     # via pre-commit
 distlib==0.3.8
     # via virtualenv
