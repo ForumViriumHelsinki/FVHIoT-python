@@ -39,7 +39,8 @@ def parse_s_sensecap(payload_hex: str, port: int) -> dict:
             data["battery_percentage"] = db[1]
         else:
             logging.warning(
-                f"Unknown telemetry ID {hex(_id)} encountered in payload '{payload_hex}' on port {port}. Stopping further parsing of this payload."
+                f"Unknown telemetry ID {hex(_id)} encountered in payload '{payload_hex}' on port {port}. "
+                "Stopping further parsing of this payload."
             )
             break
     return data
