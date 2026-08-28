@@ -4,7 +4,7 @@
 #
 #    pip-compile --extra=flask --output-file=requirements-flask.txt --strip-extras
 #
-blinker==1.8.2
+blinker==1.9.0
     # via flask
 click==8.1.7
     # via flask
