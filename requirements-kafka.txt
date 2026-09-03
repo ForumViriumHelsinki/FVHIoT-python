@@ -10,7 +10,7 @@ async-timeout==4.0.3
     # via aiokafka
 certifi==2024.7.4
     # via FVHIoT (pyproject.toml)
-msgpack==1.2.1
+msgpack==1.2.2
     # via FVHIoT (pyproject.toml)
 packaging==23.2
     # via aiokafka
