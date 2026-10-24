@@ -4,7 +4,7 @@
 #
 #    pip-compile --extra=kafka --output-file=requirements-kafka.txt --strip-extras
 #
-aiokafka==0.10.0
+aiokafka==0.14.0
     # via FVHIoT (pyproject.toml)
 async-timeout==4.0.3
     # via aiokafka
