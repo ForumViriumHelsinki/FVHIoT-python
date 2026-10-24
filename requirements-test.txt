@@ -4,7 +4,7 @@
 #
 #    pip-compile --extra=test --output-file=requirements-test.txt --strip-extras
 #
-iniconfig==2.0.0
+iniconfig==2.3.1
     # via pytest
 packaging==23.2
     # via pytest
