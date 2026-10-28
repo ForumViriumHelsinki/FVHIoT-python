@@ -12,7 +12,7 @@ filelock==4.2.4
     # via virtualenv
 identify==2.6.20
     # via pre-commit
-nodeenv==1.8.0
+nodeenv==1.11.0
     # via pre-commit
 platformdirs==4.1.0
     # via virtualenv
